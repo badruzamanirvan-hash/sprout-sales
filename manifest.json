@@ -1,0 +1,25 @@
+{
+  "name": "Sprout Sales Tracker",
+  "short_name": "Sprout Sales",
+  "description": "Internal Sales Tracking Tool for Sprout.co.id",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0B1628",
+  "theme_color": "#0B1628",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
