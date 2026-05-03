@@ -1,0 +1,2728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sprout Sales">
+<meta name="theme-color" content="#0B1628">
+<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprout Sales Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0B1628;--navy2:#132040;--navy3:#1E2F52;
+    --orange:#F97316;--orange2:#FB923C;--orange-dim:rgba(249,115,22,0.12);
+    --green:#22C55E;--red:#EF4444;--yellow:#EAB308;--blue:#3B82F6;
+    --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --card:rgba(255,255,255,0.04);--card2:rgba(255,255,255,0.07);
+    --radius:10px;--radius2:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Sora',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;}
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0B1628 0%,#132040 60%,#1a1035 100%);}
+  .login-box{width:380px;background:var(--card2);border:1px solid var(--border2);border-radius:20px;padding:40px 36px;}
+  .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+  .logo-dot{width:32px;height:32px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;}
+  .login-logo span{font-size:18px;font-weight:600;}
+  .login-logo span em{color:var(--orange);font-style:normal;}
+  .login-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+  .login-sub{font-size:13px;color:var(--text2);margin-bottom:28px;}
+  label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+  input,select,textarea{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:'Sora',sans-serif;font-size:14px;outline:none;transition:border .2s;}
+  input:focus,select:focus,textarea:focus{border-color:var(--orange);}
+  select option{background:var(--navy2);}
+  .form-group{margin-bottom:16px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 20px;border-radius:var(--radius);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .2s;}
+  .btn-primary{background:var(--orange);color:#fff;}
+  .btn-primary:hover{background:var(--orange2);transform:translateY(-1px);}
+  .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+  .btn-ghost:hover{background:var(--card2);color:var(--text);}
+  .btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+  .btn-danger:hover{background:rgba(239,68,68,.25);}
+  .btn-sm{padding:6px 12px;font-size:12px;}
+  .btn-full{width:100%;}
+  .error-msg{color:var(--red);font-size:12px;margin-top:8px;}
+  #app{display:none;min-height:100vh;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--navy2);border-right:1px solid var(--border);padding:20px 0;z-index:100;display:flex;flex-direction:column;}
+  .sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+  .logo-row{display:flex;align-items:center;gap:9px;}
+  .sidebar-dot{width:28px;height:28px;background:var(--orange);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;}
+  .sidebar-logo span{font-size:15px;font-weight:600;}
+  .sidebar-logo span em{color:var(--orange);font-style:normal;}
+  .role-tag{margin-top:8px;font-size:11px;color:var(--text3);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+  .nav-item:hover{color:var(--text);background:var(--card);}
+  .nav-item.active{color:var(--orange);background:var(--orange-dim);border-left-color:var(--orange);}
+  .nav-icon{font-size:15px;width:20px;text-align:center;}
+  .sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+  .user-info{font-size:12px;color:var(--text2);margin-bottom:10px;}
+  .user-info strong{display:block;color:var(--text);font-size:13px;}
+  .main{margin-left:220px;padding:28px 32px;min-height:100vh;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-header{margin-bottom:28px;}
+  .page-title{font-size:22px;font-weight:700;}
+  .page-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+  .stat-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:18px 20px;}
+  .stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+  .stat-value{font-size:28px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace;}
+  .c-orange{color:var(--orange);}.c-green{color:var(--green);}.c-yellow{color:var(--yellow);}.c-blue{color:var(--blue);}.c-red{color:var(--red);}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+  .badge-hot{background:rgba(239,68,68,.15);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);}
+  .badge-warm{background:rgba(234,179,8,.15);color:#FDE047;border:1px solid rgba(234,179,8,.3);}
+  .badge-cold{background:rgba(59,130,246,.15);color:#93C5FD;border:1px solid rgba(59,130,246,.3);}
+  .badge-call{background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.25);}
+  .badge-email{background:rgba(168,85,247,.12);color:#D8B4FE;border:1px solid rgba(168,85,247,.25);}
+  .badge-meeting{background:rgba(249,115,22,.12);color:#FDBA74;border:1px solid rgba(249,115,22,.25);}
+  .badge-done{background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.25);}
+  .badge-pending{background:rgba(234,179,8,.12);color:#FDE047;border:1px solid rgba(234,179,8,.25);}
+  .badge-win{background:rgba(168,85,247,.18);color:#E9D5FF;border:1px solid rgba(168,85,247,.4);}
+  tr.win-row td{background:rgba(168,85,247,.04)!important;}
+  .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:680px;}
+  th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;}
+  td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(255,255,255,.025);}
+  tr.overdue td{background:rgba(239,68,68,.04);}
+  .td-main{font-weight:500;color:var(--text);}
+  .td-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+  .panel{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:24px 28px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-grid .full{grid-column:1/-1;}
+  .toggle-group{display:flex;gap:8px;flex-wrap:wrap;}
+  .toggle-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:'Sora',sans-serif;transition:all .15s;}
+  .toggle-btn:hover{border-color:var(--orange);color:var(--text);}
+  .toggle-btn.active-call{background:rgba(34,197,94,.15);color:#86EFAC;border-color:rgba(34,197,94,.4);}
+  .toggle-btn.active-email{background:rgba(168,85,247,.15);color:#D8B4FE;border-color:rgba(168,85,247,.4);}
+  .toggle-btn.active-meeting{background:rgba(249,115,22,.15);color:#FDBA74;border-color:rgba(249,115,22,.4);}
+  .toggle-btn.active-hot{background:rgba(239,68,68,.15);color:#FCA5A5;border-color:rgba(239,68,68,.4);}
+  .toggle-btn.active-warm{background:rgba(234,179,8,.15);color:#FDE047;border-color:rgba(234,179,8,.4);}
+  .toggle-btn.active-cold{background:rgba(59,130,246,.15);color:#93C5FD;border-color:rgba(59,130,246,.4);}
+  .toggle-btn.active-win{background:rgba(168,85,247,.18);color:#E9D5FF;border-color:rgba(168,85,247,.5);}
+  textarea{resize:vertical;min-height:80px;line-height:1.5;}
+  .form-actions{display:flex;gap:10px;margin-top:20px;}
+  .section-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;margin-top:24px;}
+  .alert-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:#FCA5A5;}
+  .alert-banner:hover{background:rgba(239,68,68,.15);}
+  .project-grid{display:grid;gap:14px;}
+  .project-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px 24px;}
+  .project-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+  .project-name{font-size:15px;font-weight:600;}
+  .project-sales{font-size:12px;color:var(--text2);margin-top:3px;}
+  .milestone-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .milestone-row:last-child{margin-bottom:0;}
+  .milestone-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;}
+  .milestone-check.done{background:var(--green);border-color:var(--green);}
+  .milestone-label{font-size:13px;color:var(--text2);flex:1;}
+  .milestone-date{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--navy2);border:1px solid var(--border2);border-radius:18px;padding:28px 32px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+  .modal-title{font-size:18px;font-weight:700;}
+  .modal-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;}
+  .modal-close:hover{color:var(--text);}
+  .detail-row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-key{font-size:12px;color:var(--text3);width:110px;flex-shrink:0;padding-top:2px;}
+  .detail-val{font-size:13px;color:var(--text);flex:1;line-height:1.6;}
+  .actions-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .filter-bar input{width:180px;}
+  .filter-bar select{width:130px;}
+  .empty-state{text-align:center;padding:48px 24px;color:var(--text3);}
+  .empty-state .icon{font-size:36px;margin-bottom:12px;}
+  .empty-state p{font-size:14px;}
+  #toast{position:fixed;bottom:28px;right:28px;z-index:9999;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 20px;font-size:13px;display:none;align-items:center;gap:8px;}
+  #toast.show{display:flex;}
+  #toast.success{border-color:rgba(34,197,94,.4);color:#86EFAC;}
+  #toast.error{border-color:rgba(239,68,68,.4);color:#FCA5A5;}
+  .matrix-cell-received{background:rgba(34,197,94,.18);color:#86EFAC;}
+  .matrix-cell-invoice{background:rgba(234,179,8,.18);color:#FDE047;}
+  .matrix-cell-pending{background:rgba(100,116,139,.18);color:#94A3B8;}
+  .matrix-cell-empty{color:var(--text3);}
+  .matrix-total-row td{border-top:2px solid var(--border2)!important;font-weight:600;}
+  .matrix-month-col{min-width:110px;text-align:right;}
+  .hamburger{display:none;position:fixed;top:16px;left:16px;z-index:200;background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:18px;}
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-220px);transition:transform .25s;}
+    .sidebar.open{transform:translateX(0);}
+    .main{margin-left:0;padding:16px;}
+    .form-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .hamburger{display:block;}
+  }
+  ::-webkit-scrollbar{width:5px;}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+  .pin-row{display:flex;gap:10px;justify-content:center;margin-top:4px;}
+  .pin-box{width:46px!important;height:54px;text-align:center;font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;border-radius:10px;border:2px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text);padding:0;transition:border .2s;-moz-appearance:textfield;}
+  .pin-box::-webkit-outer-spin-button,.pin-box::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;}
+  .pin-box:focus{border-color:var(--orange);outline:none;background:rgba(249,115,22,0.06);}
+  .pin-box.filled{border-color:var(--orange2);}
+</style>
+</head>
+<body>
+
+<script>
+// ============================================================
+//  CONFIGURATION — change only this line after deploys
+// ============================================================
+//  WORKER_URL = your Cloudflare Worker URL (no trailing slash).
+//  The Worker holds the Airtable token, Base ID, and passwords
+//  as secrets — the browser never sees them.
+//  Your GitHub Pages URL must also be set as the ALLOWED_ORIGIN
+//  variable inside the Worker.
+// ============================================================
+const WORKER_URL = "https://sprout-proxy1.badruzaman-irvan.workers.dev";
+
+// Airtable table names — must match exactly what you create in Airtable
+const TABLES = {
+  activities : "Sales Activity",
+  projects   : "Project Tracking",
+  members    : "Members"
+};
+
+// ============================================================
+//  IN-MEMORY CACHE  (keeps UI sync, Airtable is sources of truth)
+// ============================================================
+const CACHE = { activities:[], projects:[], members:[] };
+
+// ============================================================
+//  AIRTABLE API HELPERS
+//  (all traffic goes through the Cloudflare Worker, which
+//  injects the Airtable token server-side — the browser never
+//  sees it)
+// ============================================================
+const AT_BASE = `${WORKER_URL}/airtable`;
+const AT_HEADERS = () => ({
+  'Content-Type' : 'application/json'
+});
+
+async function atFetchAll(table){
+  let records=[], offset=null;
+  do {
+    const url = `${AT_BASE}/${encodeURIComponent(table)}?pageSize=100${offset?'&offset='+offset:''}`;
+    const res  = await fetch(url,{headers:AT_HEADERS()});
+    if(!res.ok) throw new Error(`Airtable GET error: ${await res.text()}`);
+    const data = await res.json();
+    records    = records.concat(data.records||[]);
+    offset     = data.offset||null;
+  } while(offset);
+  return records;
+}
+
+async function atCreate(table, fields){
+  const res = await fetch(`${AT_BASE}/${encodeURIComponent(table)}`,{
+    method:'POST', headers:AT_HEADERS(),
+    body: JSON.stringify({fields})
+  });
+  if(!res.ok) throw new Error(`Airtable CREATE error: ${await res.text()}`);
+  return (await res.json());
+}
+
+async function atUpdate(table, id, fields){
+  const res = await fetch(`${AT_BASE}/${encodeURIComponent(table)}/${id}`,{
+    method:'PATCH', headers:AT_HEADERS(),
+    body: JSON.stringify({fields})
+  });
+  if(!res.ok) throw new Error(`Airtable UPDATE error: ${await res.text()}`);
+  return (await res.json());
+}
+
+async function atDelete(table, id){
+  const res = await fetch(`${AT_BASE}/${encodeURIComponent(table)}/${id}`,{
+    method:'DELETE', headers:AT_HEADERS()
+  });
+  if(!res.ok) throw new Error(`Airtable DELETE error: ${await res.text()}`);
+  return true;
+}
+
+// ============================================================
+//  SERIALISE / DESERIALISE  (Airtable fields ↔ local objects)
+// ============================================================
+function actToFields(a){
+  const f = {
+    'Tanggal'      : a.tanggal||null,
+    'Client'       : a.client||'',
+    'Sales Name'   : a.salesName||'',
+    'Activity Type': a.actType||'',
+    'MoM'          : a.mom||'',
+    'Potential'    : a.potential||'',
+    'Next Step'    : a.nextStep||'',
+    'Tanggal FU'   : a.tanggalFU||null,
+    'Status FU'    : a.statusFU||'Pending',
+    'Project ID'   : a.projectId||''
+  };
+  // Remove empty optional fields
+  Object.keys(f).forEach(k=>{ if(f[k]===null||f[k]==='') delete f[k]; });
+  return f;
+}
+function actFromRecord(r){
+  const f=r.fields;
+  return {
+    _id       : r.id,
+    id        : r.id,
+    tanggal   : f['Tanggal']||'',
+    client    : f['Client']||'',
+    salesName : f['Sales Name']||'',
+    actType   : f['Activity Type']||'',
+    mom       : f['MoM']||'',
+    potential : f['Potential']||'',
+    nextStep  : f['Next Step']||'',
+    tanggalFU : f['Tanggal FU']||null,
+    statusFU  : f['Status FU']||'Pending',
+    projectId : f['Project ID']||null,
+    createdAt : r.createdTime
+  };
+}
+
+function projToFields(p){
+  const f = {
+    'Client'       : p.client||'',
+    'Sales Name'   : p.salesName||'',
+    'Total Value'  : p.totalValue||0,
+    'Notes'        : p.notes||'',
+    'Contract Date': p.contractDate||null,
+    'Handover Date': p.handoverDate||null,
+    'Terms JSON'   : JSON.stringify(p.terms||[])
+  };
+  Object.keys(f).forEach(k=>{ if(f[k]===null||f[k]==='') delete f[k]; });
+  return f;
+}
+function projFromRecord(r){
+  const f=r.fields;
+  let terms=[];
+  try{ terms=JSON.parse(f['Terms JSON']||'[]'); }catch(e){}
+  return {
+    _id         : r.id,
+    id          : r.id,
+    client      : f['Client']||'',
+    salesName   : f['Sales Name']||'',
+    totalValue  : f['Total Value']||0,
+    notes       : f['Notes']||'',
+    contractDate: f['Contract Date']||null,
+    handoverDate: f['Handover Date']||null,
+    terms,
+    createdAt   : r.createdTime
+  };
+}
+
+function memberToFields(m){
+  const f = {
+    'Name'     : m.name||'',
+    'Role'     : m.role||'sales',
+    'Note'     : m.note||'',
+    'Password' : m.password||''
+  };
+  Object.keys(f).forEach(k=>{ if(f[k]==='') delete f[k]; });
+  return f;
+}
+function memberFromRecord(r){
+  const f=r.fields;
+  return {
+    _id      : r.id,
+    id       : r.id,
+    name     : f['Name']||'',
+    role     : f['Role']||'sales',
+    note     : f['Note']||'',
+    password : f['Password']||'',
+    createdAt: r.createdTime
+  };
+}
+
+// ============================================================
+//  HIGH-LEVEL DATA FUNCTIONS  (used by UI code)
+// ============================================================
+const DB = {
+  // Sync reads — from cache
+  get(k){ return CACHE[k]||[]; },
+
+  // Generate a temp local ID (replaced by Airtable ID after save)
+  id(){ return 'tmp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); },
+
+  // Async load all tables into cache
+  async loadAll(){
+    showGlobalLoader(true);
+    try {
+      const [actRecs, projRecs, memRecs] = await Promise.all([
+        atFetchAll(TABLES.activities),
+        atFetchAll(TABLES.projects),
+        atFetchAll(TABLES.members)
+      ]);
+      CACHE.activities = actRecs.map(actFromRecord);
+      CACHE.projects   = projRecs.map(projFromRecord);
+      CACHE.members    = memRecs.map(memberFromRecord);
+    } catch(e){
+      console.error(e);
+      showToastGlobal('⚠️ Gagal load data dari Airtable. Cek konfigurasi token & Base ID.','error');
+    }
+    showGlobalLoader(false);
+  },
+
+  // ---- ACTIVITIES ----
+  async createActivity(obj){
+    const rec = await atCreate(TABLES.activities, actToFields(obj));
+    const newObj = actFromRecord(rec);
+    CACHE.activities.unshift(newObj);
+    return newObj;
+  },
+  async updateActivity(id, obj){
+    const rec = await atUpdate(TABLES.activities, id, actToFields(obj));
+    const newObj = actFromRecord(rec);
+    const i = CACHE.activities.findIndex(a=>a.id===id);
+    if(i>-1) CACHE.activities[i]=newObj;
+    return newObj;
+  },
+  async deleteActivity(id){
+    await atDelete(TABLES.activities, id);
+    CACHE.activities = CACHE.activities.filter(a=>a.id!==id);
+  },
+
+  // ---- PROJECTS ----
+  async createProject(obj){
+    const rec = await atCreate(TABLES.projects, projToFields(obj));
+    const newObj = projFromRecord(rec);
+    CACHE.projects.unshift(newObj);
+    return newObj;
+  },
+  async updateProject(id, obj){
+    const rec = await atUpdate(TABLES.projects, id, projToFields(obj));
+    const newObj = projFromRecord(rec);
+    const i = CACHE.projects.findIndex(p=>p.id===id);
+    if(i>-1) CACHE.projects[i]=newObj;
+    return newObj;
+  },
+  async deleteProject(id){
+    await atDelete(TABLES.projects, id);
+    CACHE.projects = CACHE.projects.filter(p=>p.id!==id);
+  },
+
+  // ---- MEMBERS ----
+  async createMember(obj){
+    const rec = await atCreate(TABLES.members, memberToFields(obj));
+    const newObj = memberFromRecord(rec);
+    CACHE.members.push(newObj);
+    return newObj;
+  },
+  async updateMember(id, obj){
+    const rec = await atUpdate(TABLES.members, id, memberToFields(obj));
+    const newObj = memberFromRecord(rec);
+    const i = CACHE.members.findIndex(m=>m.id===id);
+    if(i>-1) CACHE.members[i]=newObj;
+    return newObj;
+  },
+  async deleteMember(id){
+    await atDelete(TABLES.members, id);
+    CACHE.members = CACHE.members.filter(m=>m.id!==id);
+  }
+};
+
+// ============================================================
+//  PASSWORDS
+//    - admin / head / sales(generic) → verified by the Worker
+//      (stored as Cloudflare secrets, never in the browser)
+//    - per-person member passwords  → still stored in the
+//      Airtable "Members" table via DB.updateMember
+// ============================================================
+async function verifyPasswordViaWorker(role, password){
+  try{
+    const res = await fetch(`${WORKER_URL}/login`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ role, password })
+    });
+    if(!res.ok) return false;
+    const data = await res.json();
+    return !!data.ok;
+  }catch(e){
+    return false;
+  }
+}
+
+// Global loader helper
+function showGlobalLoader(show){
+  let el=document.getElementById('global-loader');
+  if(!el){ el=document.createElement('div'); el.id='global-loader';
+    el.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--orange2));z-index:9999;transition:opacity .3s';
+    document.body.appendChild(el); }
+  el.style.opacity=show?'1':'0';
+}
+function showToastGlobal(msg,type){ showToast(msg,type); }
+</script>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><div class="logo-dot">S</div><span>Sprout <em>Sales</em></span></div>
+    <div class="login-title">Selamat datang 👋</div>
+    <div class="login-sub">Login untuk melanjutkan ke Sales Tracker</div>
+    <div class="form-group">
+      <label>Role</label>
+      <select id="login-role" onchange="document.getElementById('name-group').style.display=(this.value==='sales'||this.value==='finance')?'block':'none'">
+        <option value="sales">Sales</option>
+        <option value="finance">Finance</option>
+        <option value="head">Head of Sales</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group" id="name-group">
+      <label>Nama Kamu</label>
+      <input type="text" id="login-name" placeholder="Masukkan nama lengkap...">
+    </div>
+    <div class="form-group">
+      <label style="text-align:center;display:block">PIN</label>
+      <div class="pin-row" id="pin-row">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+      </div>
+    </div>
+    <div id="login-error" class="error-msg"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="doLogin()">Masuk →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row"><div class="sidebar-dot">S</div><span>Sprout <em>Sales</em></span></div>
+      <div class="role-tag" id="sidebar-role-label"></div>
+    </div>
+    <nav>
+      <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" id="nav-activity" onclick="showPage('activity')"><span class="nav-icon">📋</span>Sales Activity</div>
+      <div class="nav-item" id="nav-add-activity" onclick="showPage('add-activity')"><span class="nav-icon">➕</span>Tambah Aktivitas</div>
+      <div class="nav-item" id="nav-projects" onclick="showPage('projects')"><span class="nav-icon">🚀</span>Project Tracking</div>
+      <div class="nav-item" id="nav-monthly" onclick="showPage('monthly')" style="display:none"><span class="nav-icon">📅</span>Monthly Summaries</div>
+      <div class="nav-item" id="nav-add-project" onclick="showPage('add-project')" style="display:none"><span class="nav-icon">📁</span>Tambah Project</div>
+      <div class="nav-item" id="nav-members" onclick="showPage('members')" style="display:none"><span class="nav-icon">👥</span>Members</div>
+      <div class="nav-item" id="nav-settings" onclick="showPage('settings')" style="display:none"><span class="nav-icon">⚙️</span>Settings</div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-info"><strong id="sidebar-user-name"></strong>Logged in</div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="doLogout()">Keluar</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><div class="page-title">Dashboard</div><div class="page-sub">Overview aktivitas sales Sprout</div></div>
+      <div id="fu-banner"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Aktivitas Bulan Ini</div><div class="stat-value c-orange" id="s-total">0</div></div>
+        <div class="stat-card"><div class="stat-label">Hot Prospect</div><div class="stat-value c-red" id="s-hot">0</div></div>
+        <div class="stat-card"><div class="stat-label">Warm Prospect</div><div class="stat-value c-yellow" id="s-warm">0</div></div>
+        <div class="stat-card"><div class="stat-label">FU Pending</div><div class="stat-value c-blue" id="s-fu">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Call</div><div class="stat-value c-green" id="s-call">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Email</div><div class="stat-value c-orange" id="s-email">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Meeting</div><div class="stat-value c-blue" id="s-meet">0</div></div>
+        <div class="stat-card"><div class="stat-label">Active Projects</div><div class="stat-value c-green" id="s-proj">0</div></div>
+        <div class="stat-card"><div class="stat-label">🏆 Win</div><div class="stat-value" style="color:#E9D5FF" id="s-win">0</div></div>
+      </div>
+      <div id="breakdown-wrap" style="display:none">
+        <div class="section-title">Performa Per Sales</div>
+        <div class="table-wrap"><div id="breakdown-table"></div></div>
+      </div>
+      <div class="section-title">Aktivitas Terbaru</div>
+      <div class="table-wrap"><div id="recent-table"></div></div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="page" id="page-activity">
+      <div class="page-header"><div class="page-title">Sales Activity Log</div><div class="page-sub">Semua catatan aktivitas</div></div>
+      <div id="act-fu-banner"></div>
+      <div class="actions-bar">
+        <div class="filter-bar">
+          <input type="text" id="f-search" placeholder="Cari client..." oninput="renderActivityTable()">
+          <select id="f-type" onchange="renderActivityTable()"><option value="">Semua Tipe</option><option>Call</option><option>Email</option><option>Meeting</option></select>
+          <select id="f-pot" onchange="renderActivityTable()"><option value="">Semua Potential</option><option>Hot</option><option>Warm</option><option>Cold</option><option>Win</option></select>
+          <select id="f-salesname" onchange="renderActivityTable()" style="display:none"><option value="">Semua Sales</option></select>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="showPage('add-activity')">+ Tambah</button>
+        </div>
+      </div>
+      <div class="table-wrap"><div id="act-table"></div></div>
+    </div>
+
+    <!-- ADD / EDIT ACTIVITY -->
+    <div class="page" id="page-add-activity">
+      <div class="page-header"><div class="page-title" id="form-act-title">Tambah Aktivitas</div><div class="page-sub">Catat aktivitas sales kamu</div></div>
+      <div class="panel">
+        <input type="hidden" id="edit-act-id">
+        <div class="form-grid">
+          <div class="form-group"><label>Tanggal *</label><input type="date" id="fa-tanggal"></div>
+          <div class="form-group"><label>Client *</label><input type="text" id="fa-client" placeholder="Nama perusahaan / kontak..."></div>
+          <div class="form-group full">
+            <label>Call / Email / Meeting *</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-val="Call" onclick="selToggle('fa-type','Call',this)">📞 Call</button>
+              <button class="toggle-btn" data-val="Email" onclick="selToggle('fa-type','Email',this)">📧 Email</button>
+              <button class="toggle-btn" data-val="Meeting" onclick="selToggle('fa-type','Meeting',this)">🤝 Meeting</button>
+            </div>
+            <input type="hidden" id="fa-type">
+          </div>
+          <div class="form-group full"><label>MoM / Deskripsi</label><textarea id="fa-mom" placeholder="Ringkasan pembicaraan, hasil meeting, catatan penting..."></textarea></div>
+          <div class="form-group full">
+            <label>Potential *</label>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-val="Hot" onclick="selToggle('fa-pot','Hot',this)">🔥 Hot</button>
+              <button class="toggle-btn" data-val="Warm" onclick="selToggle('fa-pot','Warm',this)">☀️ Warm</button>
+              <button class="toggle-btn" data-val="Cold" onclick="selToggle('fa-pot','Cold',this)">❄️ Cold</button>
+              <button class="toggle-btn" data-val="Win" onclick="selToggle('fa-pot','Win',this)">🏆 Win</button>
+            </div>
+            <input type="hidden" id="fa-pot">
+          </div>
+          <div class="form-group full"><label>Next Step</label><textarea id="fa-nextstep" placeholder="Apa langkah selanjutnya?"></textarea></div>
+          <div class="form-group"><label>Tanggal Follow-up</label><input type="date" id="fa-fudate"></div>
+          <div class="form-group"><label>Status FU</label><select id="fa-fustatus"><option value="Pending">Pending</option><option value="Done">Done</option><option value="Win">🏆 Win</option></select></div>
+        </div>
+        <div id="act-err" class="error-msg"></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitActivity()">💾 Simpan</button>
+          <button class="btn btn-ghost" onclick="showPage('activity')">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECT TRACKING -->
+    <div class="page" id="page-projects">
+      <div class="page-header"><div class="page-title">Project Tracking</div><div class="page-sub">Pipeline, payment terms & estimasi income</div></div>
+
+      <!-- Income Summary Banner -->
+      <div id="income-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px"></div>
+
+      <div class="actions-bar">
+        <div class="filter-bar">
+          <input type="text" id="fp-search" placeholder="Cari client..." oninput="renderProjects()">
+          <select id="fp-sales" onchange="renderProjects()" style="display:none"><option value="">Semua Sales</option></select>
+          <select id="fp-status-filter" onchange="renderProjects()">
+            <option value="">Semua Status</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-add-proj" onclick="showPage('add-project')" style="display:none">+ Tambah Project</button>
+      </div>
+
+      <!-- Monthly Matrix Table (Admin only) -->
+      <div id="monthly-matrix-section" style="display:none;margin-bottom:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="section-title" style="margin:0">Monthly Payment Summary</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="font-size:12px;color:var(--text2);text-transform:none;letter-spacing:0">Tahun:</label>
+            <select id="matrix-year" onchange="renderMonthlyMatrix()" style="width:90px;padding:6px 10px;font-size:12px"></select>
+            <button class="btn btn-ghost btn-sm" onclick="downloadMatrixPDF()" style="display:flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap" id="matrix-table-wrap"><div id="monthly-matrix-table"></div></div>
+        <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(34,197,94,.25)"></span>Received</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(234,179,8,.2)"></span>Invoice Sent</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(100,116,139,.15)"></span>Pending</div>
+        </div>
+      </div>
+
+      <!-- Monthly Payment Detail Table -->
+      <div style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="section-title" style="margin:0">Payment Detail</div>
+          <select id="payment-status-filter" onchange="renderProjects()" style="width:140px;padding:6px 10px;font-size:12px">
+            <option value="Invoice Sent">Invoice Sent</option>
+            <option value="Pending">Pending</option>
+            <option value="Received">Received</option>
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="table-wrap"><div id="monthly-payment-table"></div></div>
+      </div>
+
+      <!-- Project Cards -->
+      <div class="section-title">Detail Per Project</div>
+      <div id="proj-body"></div>
+    </div>
+
+    <!-- MONTHLY SUMMARIES (Admin only) -->
+    <div class="page" id="page-monthly">
+      <div class="page-header">
+        <div class="page-title">Monthly Summaries</div>
+        <div class="page-sub">Estimasi cashflow & carryover pembayaran — Admin only</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
+          <label style="font-size:12px;color:var(--text2);text-transform:none;letter-spacing:0">Pilih Bulan:</label>
+          <input type="month" id="ms-month" onchange="renderMonthlySummaries()" style="width:180px;padding:8px 12px;font-size:13px">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="downloadMonthlySummaryPDF()" style="display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+      </div>
+      <div id="ms-kpi" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px"></div>
+      <div style="margin-bottom:28px">
+        <div class="section-title" style="margin-top:0" id="ms-cur-title">Tagihan Bulan Ini</div>
+        <div class="table-wrap"><div id="ms-cur-table"></div></div>
+      </div>
+      <div style="margin-bottom:28px">
+        <div class="section-title" style="margin-top:0">🔴 Carryover — Invoice Belum Dibayar dari Bulan Sebelumnya</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Invoice yang sudah dikirim ke klien (status Invoice Sent) namun belum dibayar hingga bulan ini. Jika klien tidak membayar, jumlah ini akan terus terbawa ke bulan berikutnya.</div>
+        <div class="table-wrap"><div id="ms-carry-table"></div></div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0">⏳ Pending Belum Diinvoice dari Bulan Sebelumnya</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Termin pembayaran yang sudah jatuh tempo namun belum dibuatkan invoice (status Pending). Perlu segera diinvoice agar bisa ditagih ke klien.</div>
+        <div class="table-wrap"><div id="ms-pending-table"></div></div>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT PROJECT -->
+    <div class="page" id="page-add-project">
+      <div class="page-header"><div class="page-title" id="form-proj-title">Tambah Project</div></div>
+      <div class="panel">
+        <input type="hidden" id="edit-proj-id">
+        <input type="hidden" id="fp-linked-act-id">
+        <div id="win-form-banner" style="display:none"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Client *</label><input type="text" id="fp-client" placeholder="Nama perusahaan..."></div>
+          <div class="form-group"><label>Sales</label><input type="text" id="fp-sales-name" placeholder="Nama sales..."></div>
+          <div class="form-group">
+            <label>Nilai Project (IDR) *</label>
+            <input type="number" id="fp-total-value" placeholder="Total nilai project..." oninput="recalcRemaining()">
+          </div>
+          <div class="form-group">
+            <label>Tgl Sign Contract</label>
+            <input type="date" id="fp-contract">
+          </div>
+          <div class="form-group">
+            <label>Tgl Handover</label>
+            <input type="date" id="fp-handover">
+          </div>
+          <div class="form-group full"><label>Notes</label><textarea id="fp-notes" placeholder="Catatan project..."></textarea></div>
+        </div>
+
+        <!-- Payment Terms Section -->
+        <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Payment Terms</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:3px">Tambah termin pembayaran. Sisa: <strong id="remaining-label" style="color:var(--orange)">—</strong></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="addPaymentTermRow()" id="btn-add-term">+ Tambah Termin</button>
+          </div>
+          <div id="payment-terms-rows"></div>
+        </div>
+
+        <div id="proj-err" class="error-msg"></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitProject()">💾 Simpan</button>
+          <button class="btn btn-ghost" onclick="showPage('projects')">Batal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="page" id="page-members">
+      <div class="page-header"><div class="page-title">Members</div><div class="page-sub">Kelola anggota tim sales</div></div>
+      <div class="panel" style="margin-bottom:20px">
+        <div class="section-title" style="margin-top:0">Tambah Member Baru</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Nama *</label><input type="text" id="m-name" placeholder="Nama lengkap..."></div>
+          <div class="form-group"><label>Role *</label>
+            <select id="m-role">
+              <option value="sales">Sales</option>
+              <option value="finance">Finance</option>
+              <option value="head">Head of Sales</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Password *</label><input type="text" id="m-pass" placeholder="Password untuk login..."></div>
+          <div class="form-group"><label>Catatan</label><input type="text" id="m-note" placeholder="Posisi, wilayah, dll..."></div>
+        </div>
+        <div id="m-err" class="error-msg"></div>
+        <button class="btn btn-primary btn-sm" onclick="addMember()">+ Tambah Member</button>
+      </div>
+
+      <div class="section-title">Tim Sales Aktif</div>
+      <div id="members-list"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><div class="page-title">Settings</div><div class="page-sub">Kelola password & konfigurasi Airtable</div></div>
+
+      <!-- Airtable Config Status -->
+      <div id="airtable-status-card" style="margin-bottom:20px"></div>
+
+      <!-- Airtable Setup Guide -->
+      <div class="panel" style="margin-bottom:20px">
+        <div class="section-title" style="margin-top:0">📋 Airtable Setup Guide</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:16px">
+          Buka file HTML ini di text editor, cari bagian <code style="background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">CONFIG</code> di atas, isi token dan Base ID.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+            <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:10px">1. Get API Token</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.7">Buka <strong style="color:var(--text)">airtable.com/create/tokens</strong><br>→ Create new token<br>→ Scope: <code>data.records:read</code> + <code>data.records:write</code><br>→ Access: pilih Base kamu</p>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+            <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:10px">2. Get Base ID</div>
+            <p style="font-size:12px;color:var(--text2);line-height:1.7">Buka Airtable Base kamu<br>→ URL: <code>airtable.com/<strong style="color:var(--text)">appXXXXX</strong>/...</code><br>→ Bagian <strong style="color:var(--text)">appXXXXX</strong> = Base ID</p>
+          </div>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px">3. Buat 3 Tabel di Airtable</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px">
+            <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:8px;text-transform:uppercase">Sales Activity</div>
+            <p style="font-size:11px;color:var(--text2);line-height:1.8">• Tanggal (Date)<br>• Client (Text)<br>• Sales Name (Text)<br>• Activity Type (Select)<br>• MoM (Long text)<br>• Potential (Select)<br>• Next Step (Long text)<br>• Tanggal FU (Date)<br>• Status FU (Select)<br>• Project ID (Text)</p>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px">
+            <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:8px;text-transform:uppercase">Project Tracking</div>
+            <p style="font-size:11px;color:var(--text2);line-height:1.8">• Client (Text)<br>• Sales Name (Text)<br>• Total Value (Number)<br>• Notes (Long text)<br>• Contract Date (Date)<br>• Handover Date (Date)<br>• Terms JSON (Long text)</p>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px">
+            <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:8px;text-transform:uppercase">Members</div>
+            <p style="font-size:11px;color:var(--text2);line-height:1.8">• Name (Text)<br>• Role (Single select)<br>• Note (Text)<br>• Password (Text)</p>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:#86EFAC;line-height:1.7">
+          ✅ <strong>Select field values to add:</strong><br>
+          Activity Type: <code>Call, Email, Meeting</code><br>
+          Potential: <code>Hot, Warm, Cold, Win</code><br>
+          Status FU: <code>Pending, Done, Win</code><br>
+          Role (Members): <code>sales, head</code>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="panel" style="margin-bottom:20px">
+        <div class="section-title" style="margin-top:0">Ganti Password (Admin / Head)</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Role</label><select id="pw-role"><option value="admin">Admin</option><option value="head">Head of Sales</option><option value="sales">Sales (generic)</option></select></div>
+          <div class="form-group"><label>Password Baru</label><input type="text" id="pw-val" placeholder="Password baru..."></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="changePassword()">Update Password</button>
+      </div>
+
+      <!-- Backup -->
+      <div class="panel">
+        <div class="section-title" style="margin-top:0">Backup Data</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.8">
+          Export snapshot dari cache sebagai JSON. Data utama tersimpan di Airtable.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="exportAll()">⬇ Backup JSON (cache)</button>
+          <button class="btn btn-ghost btn-sm" onclick="DB.loadAll().then(()=>toast('Data di-refresh dari Airtable ✓'))">🔄 Refresh dari Airtable</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- WIN PROJECT MODAL -->
+<div class="modal-overlay" id="win-modal" onclick="if(event.target===this)closeModal('win-modal')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div class="modal-title">🏆 Mark as Win — Buat Project</div>
+      <button class="modal-close" onclick="closeModal('win-modal')">×</button>
+    </div>
+    <input type="hidden" id="win-act-id">
+    <div id="win-modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Client</label>
+          <input type="text" id="wm-client" placeholder="Nama perusahaan...">
+        </div>
+        <div class="form-group">
+          <label>Sales</label>
+          <input type="text" id="wm-sales" readonly style="opacity:.7">
+        </div>
+        <div class="form-group">
+          <label>Nilai Project (IDR) *</label>
+          <input type="number" id="wm-value" placeholder="Total nilai project..." oninput="recalcWinRemaining()">
+        </div>
+        <div class="form-group">
+          <label>Tgl Sign Contract</label>
+          <input type="date" id="wm-contract">
+        </div>
+        <div class="form-group">
+          <label>Tgl Handover</label>
+          <input type="date" id="wm-handover">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" id="wm-notes" placeholder="Catatan project...">
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:18px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <div style="font-size:13px;font-weight:600">Payment Terms</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">Sisa: <strong id="win-remaining" style="color:var(--orange)">—</strong></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="addWinTermRow()">+ Tambah Termin</button>
+        </div>
+        <div id="win-term-rows"></div>
+      </div>
+
+      <div id="win-err" class="error-msg" style="margin-top:8px"></div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitWinProject()">🏆 Simpan & Buat Project</button>
+        <button class="btn btn-ghost" onclick="closeModal('win-modal')">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROJECT PAYMENT MODAL (from activity) -->
+<div class="modal-overlay" id="proj-edit-modal" onclick="if(event.target===this)closeModal('proj-edit-modal')">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title" id="proj-edit-modal-title">Edit Project</div>
+      <button class="modal-close" onclick="closeModal('proj-edit-modal')">×</button>
+    </div>
+    <input type="hidden" id="pem-proj-id">
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-group">
+        <label>Nilai Project (IDR)</label>
+        <input type="number" id="pem-value" placeholder="0" oninput="recalcPemRemaining()">
+      </div>
+      <div class="form-group">
+        <label>Tgl Sign Contract</label>
+        <input type="date" id="pem-contract">
+      </div>
+      <div class="form-group">
+        <label>Tgl Handover</label>
+        <input type="date" id="pem-handover">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="pem-notes" placeholder="Catatan...">
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;font-weight:600">Payment Terms</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Sisa: <strong id="pem-remaining" style="color:var(--orange)">—</strong></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addPemTermRow()">+ Tambah Termin</button>
+      </div>
+      <div id="pem-term-rows"></div>
+    </div>
+    <div id="pem-err" class="error-msg" style="margin-top:8px"></div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="submitPemProject()">💾 Simpan Project</button>
+      <button class="btn btn-ghost" onclick="closeModal('proj-edit-modal')">Batal</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="detail-modal" onclick="if(event.target===this)closeModal('detail-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Detail Aktivitas</div><button class="modal-close" onclick="closeModal('detail-modal')">×</button></div>
+    <div id="modal-body"></div>
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap" id="modal-actions"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let CU = null; // currentUser
+let fuFilter = false;
+
+// ===== AUTH — doLogin is defined later after member helpers =====
+
+function doLogout(){
+  CU=null;
+  // Reset all nav to clean default before next login
+  ['nav-dashboard','nav-activity','nav-add-activity','nav-projects'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='flex';});
+  ['nav-add-project','nav-members','nav-settings','nav-monthly','btn-add-proj'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.getElementById('breakdown-wrap').style.display='none';
+  const _fsn=document.getElementById('f-salesname');if(_fsn){_fsn.style.display='none';_fsn.value='';}
+  const _fps=document.getElementById('fp-sales');if(_fps){_fps.style.display='none';_fps.value='';}
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.querySelectorAll('.pin-box').forEach(b=>{b.value='';b.classList.remove('filled');});
+  document.querySelectorAll('.pin-box')[0]?.focus();
+  document.getElementById('login-error').textContent='';
+}
+
+function setupUI(){
+  document.getElementById('sidebar-user-name').textContent=CU.name;
+  document.getElementById('sidebar-role-label').textContent={admin:'🔑 Admin',head:'👁 Head of Sales',sales:'💼 Sales',finance:'💰 Finance'}[CU.role];
+
+  // Airtable connection status (shown in Settings page)
+  const statusCard=document.getElementById('airtable-status-card');
+  if(statusCard){
+    const configured=!!WORKER_URL && !/YOUR-WORKER-SUBDOMAIN/.test(WORKER_URL);
+    statusCard.innerHTML=configured
+      ?`<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#86EFAC;display:flex;align-items:center;gap:8px">
+          ✅ <strong>Terhubung via Cloudflare Worker</strong> — Endpoint: <code>${WORKER_URL}</code>
+        </div>`
+      :`<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:#FCA5A5;display:flex;align-items:center;gap:8px">
+          ⚠️ <strong>Belum dikonfigurasi</strong> — Set WORKER_URL di bagian CONFIGURATION di atas file HTML.
+        </div>`;
+  }
+
+  // Reset all nav items to default state first (fixes stale DOM after logout)
+  ['nav-dashboard','nav-activity','nav-add-activity','nav-projects'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='flex';});
+  ['nav-add-project','nav-members','nav-settings','nav-monthly','btn-add-proj'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+
+  // Finance: only show Project Tracking
+  if(CU.role==='finance'){
+    ['nav-dashboard','nav-activity','nav-add-activity'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  } else {
+    // All non-finance roles can add/edit projects
+    ['nav-add-project','btn-add-proj'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='flex';});
+  }
+
+  // Admin-only: Settings, Members
+  if(CU.role==='admin'){
+    ['nav-settings','nav-members','nav-monthly'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='flex';});
+  }
+  // Finance also gets Monthly Summaries
+  if(CU.role==='finance'){
+    const navMonthly=document.getElementById('nav-monthly');
+    if(navMonthly) navMonthly.style.display='flex';
+  }
+
+  // Admin and Finance: monthly payment matrix + year selector
+  if(CU.role==='admin'||CU.role==='finance'){
+    const matSec=document.getElementById('monthly-matrix-section');
+    if(matSec) matSec.style.display='block';
+    const yrSel=document.getElementById('matrix-year');
+    if(yrSel){
+      const curYear=new Date().getFullYear();
+      yrSel.innerHTML='';
+      for(let y=curYear-1;y<=curYear+1;y++){
+        const o=document.createElement('option');
+        o.value=y; o.textContent=y;
+        if(y===curYear) o.selected=true;
+        yrSel.appendChild(o);
+      }
+    }
+  }
+  if(CU.role!=='finance'){
+    // Sales name filter visible for all non-finance roles
+    const fsn=document.getElementById('f-salesname');
+    if(fsn) fsn.style.display='block';
+    if(CU.role!=='sales'){
+      // Breakdown table and project sales filter only for admin/head
+      document.getElementById('breakdown-wrap').style.display='block';
+      const fps=document.getElementById('fp-sales');
+      if(fps) fps.style.display='block';
+    }
+    refreshSalesDropdowns();
+  }
+}
+
+function refreshSalesDropdowns(){
+  const memberNames=DB.get('members').map(m=>m.name);
+  const actNames=DB.get('activities').map(a=>a.salesName).filter(Boolean);
+  const projNames=DB.get('projects').map(p=>p.salesName).filter(Boolean);
+  const names=[...new Set([...memberNames,...actNames,...projNames])].sort();
+  ['f-salesname','fp-sales'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="">Semua Sales</option>';
+    names.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;sel.appendChild(o);});
+    sel.value=cur;
+  });
+}
+
+// ===== MEMBERS =====
+function getMemberPasswords(){ return {}; } // passwords now in Members table
+function setMemberPasswords(obj){} // no-op, handled via DB.updateMember
+
+async function doLogin(){
+  const role=document.getElementById('login-role').value;
+  const name=document.getElementById('login-name').value.trim();
+  const pass=[...document.querySelectorAll('.pin-box')].map(b=>b.value).join('');
+  const err=document.getElementById('login-error');
+  err.textContent='';
+
+  if(pass.length<6){err.textContent='Masukkan 6 digit PIN';return;}
+
+  if(role==='admin'){
+    const ok=await verifyPasswordViaWorker('admin',pass);
+    if(!ok){err.textContent='Password salah';return;}
+    CU={role:'admin',name:'Admin'};
+  } else if(role==='head'){
+    const ok=await verifyPasswordViaWorker('head',pass);
+    if(!ok){err.textContent='Password salah';return;}
+    CU={role:'head',name:'Head of Sales'};
+  } else if(role==='finance'){
+    if(!name){err.textContent='Masukkan nama kamu';return;}
+    const ok=await verifyPasswordViaWorker('finance',pass);
+    if(!ok){err.textContent='Password salah';return;}
+    CU={role:'finance',name};
+  } else {
+    if(!name){err.textContent='Masukkan nama kamu';return;}
+    const ok=await verifyPasswordViaWorker('sales',pass);
+    if(!ok){err.textContent='Password salah';return;}
+    CU={role:'sales',name};
+  }
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  setupUI();
+  // Load all data from Airtable, then render starting page
+  DB.loadAll().then(()=>{
+    refreshSalesDropdowns();
+    if(CU.role==='sales'){
+      const sel=document.getElementById('f-salesname');
+      if(sel) sel.value=CU.name;
+    }
+    showPage(CU.role==='finance'?'projects':'dashboard');
+  });
+}
+function showPage(pg){
+  if((pg==='settings'||pg==='members')&&CU.role!=='admin') return;
+  if(pg==='monthly'&&CU.role!=='admin'&&CU.role!=='finance') return;
+  if(CU.role==='finance'&&(pg==='dashboard'||pg==='activity'||pg==='add-activity'||pg==='add-project')) return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  const nav=document.getElementById('nav-'+pg); if(nav)nav.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  if(pg==='add-activity') resetActForm();
+  if(pg==='add-project')  resetProjForm();
+  if(pg==='dashboard')    renderDash();
+  if(pg==='activity')     renderActivityTable();
+  if(pg==='projects')     renderProjects();
+  if(pg==='members')      renderMembers();
+  if(pg==='monthly')      renderMonthlySummaries();
+}
+
+// ===== HELPERS =====
+const months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function fmtDate(d){if(!d)return '-';const[y,m,day]=d.split('-');return `${+day} ${months[+m-1]} ${y}`;}
+function fmtIDR(n){return new Intl.NumberFormat('id-ID').format(n||0);}
+function tod(){return new Date().toISOString().split('T')[0];}
+function mon(){return tod().slice(0,7);}
+function toast(msg,t='success'){const el=document.getElementById('toast');el.textContent=msg;el.className='show '+t;setTimeout(()=>el.className='',3000);}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function selToggle(hidId,val,btn){
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  btn.classList.add('active-'+val.toLowerCase());
+  document.getElementById(hidId).value=val;
+}
+
+function myActs(){
+  const all=DB.get('activities');
+  return CU.role==='sales'?all.filter(a=>(a.salesName||'').toLowerCase()===CU.name.toLowerCase()):all;
+}
+function myProjs(){
+  const all=DB.get('projects');
+  return CU.role==='sales'?all.filter(p=>(p.salesName||'').toLowerCase()===CU.name.toLowerCase()):all;
+}
+
+// ===== DASHBOARD =====
+function renderDash(){
+  const acts=myActs(), t=tod(), m=mon();
+  const mActs=acts.filter(a=>a.tanggal&&a.tanggal.startsWith(m));
+  const overdue=acts.filter(a=>a.statusFU==='Pending'&&a.tanggalFU&&a.tanggalFU<=t);
+  document.getElementById('s-total').textContent=mActs.length;
+  document.getElementById('s-hot').textContent=acts.filter(a=>a.potential==='Hot').length;
+  document.getElementById('s-warm').textContent=acts.filter(a=>a.potential==='Warm').length;
+  document.getElementById('s-fu').textContent=acts.filter(a=>a.statusFU==='Pending'&&a.tanggalFU).length;
+  document.getElementById('s-call').textContent=acts.filter(a=>a.actType==='Call').length;
+  document.getElementById('s-email').textContent=acts.filter(a=>a.actType==='Email').length;
+  document.getElementById('s-meet').textContent=acts.filter(a=>a.actType==='Meeting').length;
+  document.getElementById('s-proj').textContent=myProjs().length;
+  document.getElementById('s-win').textContent=acts.filter(a=>a.potential==='Win').length;
+
+  const banner=document.getElementById('fu-banner');
+  banner.innerHTML=overdue.length?`<div class="alert-banner" onclick="showPage('activity');fuFilter=true;renderActivityTable()">🚨 <strong>${overdue.length} follow-up</strong> overdue atau jatuh tempo hari ini — Klik untuk lihat</div>`:'';
+
+  if(CU.role!=='sales'){
+    const all=DB.get('activities');
+    const names=[...new Set(all.map(a=>a.salesName).filter(Boolean))];
+    if(names.length){
+      let h='<table><thead><tr><th>Sales</th><th>Total</th><th>Hot</th><th>Warm</th><th>Cold</th><th>FU Pending</th><th>Call</th><th>Email</th><th>Meeting</th></tr></thead><tbody>';
+      names.forEach(n=>{
+        const s=all.filter(a=>a.salesName===n);
+        h+=`<tr><td class="td-main">${n}</td><td>${s.length}</td>
+          <td><span class="badge badge-hot">${s.filter(a=>a.potential==='Hot').length}</span></td>
+          <td><span class="badge badge-warm">${s.filter(a=>a.potential==='Warm').length}</span></td>
+          <td><span class="badge badge-cold">${s.filter(a=>a.potential==='Cold').length}</span></td>
+          <td>${s.filter(a=>a.statusFU==='Pending'&&a.tanggalFU).length}</td>
+          <td>${s.filter(a=>a.actType==='Call').length}</td>
+          <td>${s.filter(a=>a.actType==='Email').length}</td>
+          <td>${s.filter(a=>a.actType==='Meeting').length}</td>
+        </tr>`;
+      });
+      document.getElementById('breakdown-table').innerHTML=h+'</tbody></table>';
+    }
+  }
+
+  const recent=[...acts].sort((a,b)=>b.tanggal>a.tanggal?1:-1).slice(0,8);
+  document.getElementById('recent-table').innerHTML=recent.length?buildActRows(recent,false):`<div class="empty-state"><div class="icon">📋</div><p>Belum ada aktivitas. Mulai tambah aktivitas pertama kamu!</p></div>`;
+}
+
+// ===== ACTIVITY TABLE =====
+function renderActivityTable(){
+  let acts=myActs();
+  const t=tod();
+  const q=(document.getElementById('f-search')?.value||'').toLowerCase();
+  const tp=document.getElementById('f-type')?.value||'';
+  const pt=document.getElementById('f-pot')?.value||'';
+  const sn=document.getElementById('f-salesname')?.value||'';
+  if(q)  acts=acts.filter(a=>(a.client||'').toLowerCase().includes(q));
+  if(tp) acts=acts.filter(a=>a.actType===tp);
+  if(pt) acts=acts.filter(a=>a.potential===pt);
+  if(sn) acts=acts.filter(a=>a.salesName===sn);
+  if(fuFilter) acts=acts.filter(a=>a.statusFU==='Pending'&&a.tanggalFU&&a.tanggalFU<=t);
+
+  const overdue=myActs().filter(a=>a.statusFU==='Pending'&&a.tanggalFU&&a.tanggalFU<=t);
+  const banner=document.getElementById('act-fu-banner');
+  banner.innerHTML=overdue.length?`<div class="alert-banner" onclick="fuFilter=!fuFilter;renderActivityTable()">🚨 <strong>${overdue.length} follow-up</strong> overdue/hari ini — ${fuFilter?'Tampilkan semua':'Filter sekarang'}</div>`:'';
+
+  const sorted=[...acts].sort((a,b)=>b.tanggal>a.tanggal?1:-1);
+  document.getElementById('act-table').innerHTML=sorted.length?buildActRows(sorted,true):`<div class="empty-state"><div class="icon">🔍</div><p>Tidak ada aktivitas yang cocok.</p></div>`;
+}
+
+function buildActRows(recs,actions){
+  const t=tod();
+  const canEdit=CU.role==='admin'||CU.role==='sales';
+  const canDel=CU.role==='admin';
+  let h=`<table><thead><tr><th>Tanggal</th><th>Client</th><th>Tipe</th><th>Status</th><th>Next Step</th><th>Tgl FU</th><th>FU</th>${actions?'<th>Aksi</th>':''}</tr></thead><tbody>`;
+  recs.forEach(r=>{
+    const ov=r.statusFU==='Pending'&&r.tanggalFU&&r.tanggalFU<=t;
+    const isWin=r.potential==='Win';
+    const tc=(r.actType||'').toLowerCase();
+    const pc=(r.potential||'').toLowerCase();
+    const linkedProj=r.projectId?DB.get('projects').find(p=>p.id===r.projectId):null;
+    h+=`<tr class="${ov?'overdue':isWin?'win-row':''}" onclick="openDetail('${r.id}')" style="cursor:pointer">
+      <td><div class="td-main">${fmtDate(r.tanggal)}</div><div class="td-sub">${r.salesName||''}</div></td>
+      <td>
+        <div class="td-main">${r.client||'-'}</div>
+        ${linkedProj?`<div class="td-sub" style="color:#E9D5FF">🔗 ${linkedProj.client}</div>`:''}
+      </td>
+      <td><span class="badge badge-${tc}">${r.actType||'-'}</span></td>
+      <td>
+        <span class="badge badge-${pc}">${r.potential||'-'}</span>
+        ${isWin&&!r.projectId&&actions?`<div style="margin-top:4px"><button class="btn btn-sm" style="background:rgba(168,85,247,.15);color:#E9D5FF;border:1px solid rgba(168,85,247,.4);font-size:10px;padding:3px 8px" onclick="event.stopPropagation();openWinModal('${r.id}')">+ Buat Project</button></div>`:''}
+      </td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nextStep||'-'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${fmtDate(r.tanggalFU)}</td>
+      <td><span class="badge badge-${(r.statusFU||'pending').toLowerCase()}">${r.statusFU||'Pending'}</span></td>
+      ${actions?`<td onclick="event.stopPropagation()"><div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${r.statusFU!=='Done'&&r.statusFU!=='Win'?`<button class="btn btn-sm" style="background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.3)" onclick="markDone('${r.id}')">✓</button>`:''}
+        ${canEdit?`<button class="btn btn-ghost btn-sm" onclick="editAct('${r.id}')">Edit</button>`:''}
+        ${canDel?`<button class="btn btn-danger btn-sm" onclick="delAct('${r.id}')">Del</button>`:''}
+      </div></td>`:''}
+    </tr>`;
+  });
+  return h+'</tbody></table>';
+}
+
+// ===== DETAIL MODAL =====
+function openDetail(id){
+  const r=DB.get('activities').find(a=>a.id===id); if(!r) return;
+  const canEdit=CU.role==='admin'||CU.role==='sales', canDel=CU.role==='admin';
+  const tc=(r.actType||'').toLowerCase(),pc=(r.potential||'').toLowerCase(),sc=(r.statusFU||'pending').toLowerCase();
+  const isWin=r.potential==='Win';
+  const linkedProj=r.projectId?DB.get('projects').find(p=>p.id===r.projectId):null;
+
+  document.getElementById('modal-body').innerHTML=`
+    ${isWin?`<div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#E9D5FF">
+      🏆 <strong>Deal Won!</strong>${linkedProj?' Linked ke project: <strong>'+linkedProj.client+'</strong>':' Belum ada project — klik "Buat Project" di bawah'}
+    </div>`:''}
+    <div class="detail-row"><div class="detail-key">Tanggal</div><div class="detail-val">${fmtDate(r.tanggal)}</div></div>
+    <div class="detail-row"><div class="detail-key">Client</div><div class="detail-val">${r.client||'-'}</div></div>
+    <div class="detail-row"><div class="detail-key">Sales</div><div class="detail-val">${r.salesName||'-'}</div></div>
+    <div class="detail-row"><div class="detail-key">Tipe</div><div class="detail-val"><span class="badge badge-${tc}">${r.actType||'-'}</span></div></div>
+    <div class="detail-row"><div class="detail-key">Potential</div><div class="detail-val"><span class="badge badge-${pc}">${r.potential||'-'}</span></div></div>
+    <div class="detail-row"><div class="detail-key">MoM</div><div class="detail-val">${(r.mom||'-').replace(/\n/g,'<br>')}</div></div>
+    <div class="detail-row"><div class="detail-key">Next Step</div><div class="detail-val">${(r.nextStep||'-').replace(/\n/g,'<br>')}</div></div>
+    <div class="detail-row"><div class="detail-key">Tanggal FU</div><div class="detail-val">${fmtDate(r.tanggalFU)}</div></div>
+    <div class="detail-row"><div class="detail-key">Status FU</div><div class="detail-val"><span class="badge badge-${sc}">${r.statusFU||'Pending'}</span></div></div>
+    ${linkedProj?`<div class="detail-row"><div class="detail-key">Project</div><div class="detail-val">
+      <div style="font-weight:500">${linkedProj.client}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px">Nilai: Rp ${fmtIDR(linkedProj.totalValue||0)} · ${(linkedProj.terms||[]).length} termin</div>
+    </div></div>`:''}`;
+
+  let acts='';
+  if(r.statusFU!=='Done'&&r.statusFU!=='Win') acts+=`<button class="btn btn-sm" style="background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.3)" onclick="markDone('${id}');closeModal('detail-modal')">✓ Mark FU Done</button>`;
+  if(isWin&&!r.projectId) acts+=`<button class="btn btn-sm" style="background:rgba(168,85,247,.15);color:#E9D5FF;border:1px solid rgba(168,85,247,.4)" onclick="closeModal('detail-modal');openWinModal('${id}')">🏆 Buat Project</button>`;
+  if(isWin&&linkedProj)   acts+=`<button class="btn btn-sm" style="background:rgba(168,85,247,.15);color:#E9D5FF;border:1px solid rgba(168,85,247,.4)" onclick="closeModal('detail-modal');openProjEditModal('${linkedProj.id}')">✏️ Edit Project & Payment</button>`;
+  if(canEdit) acts+=`<button class="btn btn-ghost btn-sm" onclick="editAct('${id}')">✏️ Edit Aktivitas</button>`;
+  if(canDel)  acts+=`<button class="btn btn-danger btn-sm" onclick="delAct('${id}');closeModal('detail-modal')">🗑 Hapus</button>`;
+  document.getElementById('modal-actions').innerHTML=acts;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+// ===== ACTIVITY CRUD =====
+function resetActForm(){
+  document.getElementById('edit-act-id').value='';
+  document.getElementById('form-act-title').textContent='Tambah Aktivitas';
+  ['fa-client','fa-mom','fa-nextstep','fa-fudate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fa-tanggal').value=tod();
+  document.getElementById('fa-type').value='';
+  document.getElementById('fa-pot').value='';
+  document.getElementById('fa-fustatus').value='Pending';
+  document.getElementById('act-err').textContent='';
+  document.querySelectorAll('#page-add-activity .toggle-btn').forEach(b=>b.className='toggle-btn');
+}
+
+function submitActivity(){
+  const err=document.getElementById('act-err');
+  const tanggal=document.getElementById('fa-tanggal').value;
+  const client=document.getElementById('fa-client').value.trim();
+  const type=document.getElementById('fa-type').value;
+  const pot=document.getElementById('fa-pot').value;
+  if(!tanggal||!client||!type||!pot){err.textContent='Lengkapi field yang wajib (*)';return;}
+  const eid=document.getElementById('edit-act-id').value;
+  const fuStatus=document.getElementById('fa-fustatus').value;
+  const finalFuStatus=(pot==='Win')?'Win':fuStatus;
+  const existingAct=eid?DB.get('activities').find(a=>a.id===eid):null;
+  const rec={
+    id:eid||DB.id(), tanggal, client,
+    salesName:CU.name, actType:type,
+    mom:document.getElementById('fa-mom').value,
+    potential:pot,
+    nextStep:document.getElementById('fa-nextstep').value,
+    tanggalFU:document.getElementById('fa-fudate').value||null,
+    statusFU:finalFuStatus,
+    projectId:existingAct?.projectId||null,
+    createdAt:eid?existingAct?.createdAt:new Date().toISOString()
+  };
+  const btn=document.querySelector('#page-add-activity .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Menyimpan...';}
+  const doSave = eid
+    ? DB.updateActivity(eid, rec)
+    : DB.createActivity(rec);
+  doSave.then(saved=>{
+    refreshSalesDropdowns();
+    toast(eid?'Aktivitas diperbarui ✓':'Aktivitas tersimpan ✓');
+    if(pot==='Win'&&!saved.projectId){
+      showPage('projects');
+      setTimeout(()=>openWinToProject(saved.id),200);
+    } else {
+      showPage('activity');
+    }
+  }).catch(e=>{
+    err.textContent='Gagal menyimpan: '+e.message;
+  }).finally(()=>{
+    if(btn){btn.disabled=false;btn.textContent='💾 Simpan';}
+  });
+}
+
+function editAct(id){
+  const r=DB.get('activities').find(a=>a.id===id); if(!r) return;
+  // showPage first (it calls resetActForm internally), then populate
+  showPage('add-activity');
+  closeModal('detail-modal');
+
+  // Now populate form with existing data
+  document.getElementById('edit-act-id').value=id;
+  document.getElementById('form-act-title').textContent='Edit Aktivitas';
+  document.getElementById('fa-tanggal').value=r.tanggal||'';
+  document.getElementById('fa-client').value=r.client||'';
+  document.getElementById('fa-mom').value=r.mom||'';
+  document.getElementById('fa-nextstep').value=r.nextStep||'';
+  document.getElementById('fa-fudate').value=r.tanggalFU||'';
+  document.getElementById('fa-fustatus').value=r.statusFU||'Pending';
+  if(r.actType){
+    const b=document.querySelector(`#page-add-activity .toggle-btn[data-val="${r.actType}"]`);
+    if(b) selToggle('fa-type', r.actType, b);
+  }
+  if(r.potential){
+    const b=document.querySelector(`#page-add-activity .toggle-btn[data-val="${r.potential}"]`);
+    if(b) selToggle('fa-pot', r.potential, b);
+  }
+}
+
+// ===== WIN → PROJECT (direct form flow) =====
+function openWinToProject(actId){
+  const r=DB.get('activities').find(a=>a.id===actId); if(!r) return;
+  // Navigate to add-project and pre-fill
+  showPage('add-project');
+  document.getElementById('edit-proj-id').value='';  // new project
+  document.getElementById('form-proj-title').textContent='🏆 Buat Project dari Win — '+r.client;
+  document.getElementById('fp-client').value=r.client||'';
+  document.getElementById('fp-sales-name').value=r.salesName||CU.name;
+  document.getElementById('fp-contract').value=r.tanggal||'';
+  document.getElementById('fp-notes').value=r.mom||'';
+  // Store the linked actId in a hidden field
+  document.getElementById('fp-linked-act-id').value=actId;
+  // Show a win banner on the form
+  document.getElementById('win-form-banner').style.display='block';
+  document.getElementById('win-form-banner').innerHTML=`
+    <div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:8px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#E9D5FF">
+      🏆 <strong>Deal Won!</strong> Mengisi project untuk aktivitas Win dengan client <strong>${r.client}</strong>. Project akan otomatis ter-link ke aktivitas ini.
+    </div>`;
+}
+
+// ===== WIN PROJECT MODAL (keep for backward compat from detail modal) =====
+let winTermCount=0;
+function openWinModal(actId){
+  // Use direct form flow — same as openWinToProject
+  openWinToProject(actId);
+}
+
+function addWinTermRow(prefill){
+  winTermCount++;
+  const id=prefill?prefill.id:'wt_'+winTermCount;
+  const container=document.getElementById('win-term-rows');
+  const div=document.createElement('div');
+  div.id='wt-row-'+id;
+  div.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:10px;align-items:end';
+  div.innerHTML=`
+    <div class="form-group" style="margin:0"><label>Label</label><input type="text" value="${prefill?prefill.label:'DP'}" placeholder="DP, Termin 1..."></div>
+    <div class="form-group" style="margin:0"><label>Due Date</label><input type="date" value="${prefill?prefill.dueDate||'':''}"></div>
+    <div class="form-group" style="margin:0"><label>Nominal (IDR)</label><input type="number" value="${prefill?prefill.amount||'':''}" placeholder="0" oninput="recalcWinRemaining()"></div>
+    <div class="form-group" style="margin:0"><label>Status</label><select>
+      ${Object.keys(PAY_STATUS).map(k=>`<option value="${k}" ${prefill&&prefill.status===k?'selected':''}>${k}</option>`).join('')}
+    </select></div>
+    <button type="button" onclick="this.closest('div[id]').remove();recalcWinRemaining()" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:14px;align-self:end">✕</button>`;
+  container.appendChild(div);
+  recalcWinRemaining();
+}
+
+function recalcWinRemaining(){
+  const total=parseFloat(document.getElementById('wm-value')?.value)||0;
+  let sum=0;
+  document.querySelectorAll('#win-term-rows > div input[type=number]').forEach(i=>sum+=parseFloat(i.value||0));
+  const rem=total-sum;
+  const label=document.getElementById('win-remaining');
+  if(!label) return;
+  if(!total){label.textContent='Isi nilai project dulu';return;}
+  label.textContent=`Rp ${fmtIDR(rem)}`;
+  label.style.color=rem<0?'var(--red)':rem===0?'var(--green)':'var(--orange)';
+}
+
+function getWinTermRows(){
+  const rows=document.querySelectorAll('#win-term-rows > div');
+  const terms=[];
+  rows.forEach((row,i)=>{
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    terms.push({id:'wt_'+Date.now()+'_'+i, label:inputs[0].value.trim()||`Termin ${i+1}`, dueDate:inputs[1].value||null, amount:parseFloat(inputs[2].value)||0, status:sel.value});
+  });
+  return terms;
+}
+
+function submitWinProject(){
+  const err=document.getElementById('win-err');
+  const client=document.getElementById('wm-client').value.trim();
+  if(!client){err.textContent='Masukkan nama client';return;}
+  const actId=document.getElementById('win-act-id').value;
+  const proj={
+    client,
+    salesName:document.getElementById('wm-sales').value||CU.name,
+    totalValue:parseFloat(document.getElementById('wm-value').value)||0,
+    notes:document.getElementById('wm-notes').value||null,
+    contractDate:document.getElementById('wm-contract').value||null,
+    handoverDate:document.getElementById('wm-handover').value||null,
+    terms:getWinTermRows()
+  };
+  DB.createProject(proj).then(saved=>{
+    const actRec=DB.get('activities').find(a=>a.id===actId);
+    if(actRec) return DB.updateActivity(actId,{...actRec,projectId:saved.id,potential:'Win',statusFU:'Win'});
+  }).then(()=>{
+    closeModal('win-modal');
+    toast('🏆 Project dibuat & di-link ke aktivitas!','success');
+    renderActivityTable();
+  }).catch(e=>{err.textContent='Gagal: '+e.message;});
+}
+
+// ===== PROJ EDIT MODAL (from activity) =====
+let pemTermCount=0;
+function openProjEditModal(projId){
+  closeModal('detail-modal');
+  editProj(projId);
+}
+
+function addPemTermRow(prefill){
+  pemTermCount++;
+  const id=prefill?prefill.id:'pm_'+pemTermCount;
+  const container=document.getElementById('pem-term-rows');
+  const div=document.createElement('div');
+  div.id='pm-row-'+id;
+  div.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:10px;align-items:end';
+  div.innerHTML=`
+    <div class="form-group" style="margin:0"><label>Label</label><input type="text" value="${prefill?prefill.label:'DP'}" placeholder="DP, Termin 1..."></div>
+    <div class="form-group" style="margin:0"><label>Due Date</label><input type="date" value="${prefill?prefill.dueDate||'':''}"></div>
+    <div class="form-group" style="margin:0"><label>Nominal (IDR)</label><input type="number" value="${prefill?prefill.amount||'':''}" placeholder="0" oninput="recalcPemRemaining()"></div>
+    <div class="form-group" style="margin:0"><label>Status</label><select>
+      ${Object.keys(PAY_STATUS).map(k=>`<option value="${k}" ${prefill&&prefill.status===k?'selected':''}>${k}</option>`).join('')}
+    </select></div>
+    <button type="button" onclick="this.closest('div[id]').remove();recalcPemRemaining()" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:14px;align-self:end">✕</button>`;
+  container.appendChild(div);
+  recalcPemRemaining();
+}
+
+function recalcPemRemaining(){
+  const total=parseFloat(document.getElementById('pem-value')?.value)||0;
+  let sum=0;
+  document.querySelectorAll('#pem-term-rows > div input[type=number]').forEach(i=>sum+=parseFloat(i.value||0));
+  const rem=total-sum;
+  const label=document.getElementById('pem-remaining');
+  if(!label) return;
+  if(!total){label.textContent='Isi nilai project dulu';return;}
+  label.textContent=`Rp ${fmtIDR(rem)}`;
+  label.style.color=rem<0?'var(--red)':rem===0?'var(--green)':'var(--orange)';
+}
+
+function getPemTermRows(){
+  const rows=document.querySelectorAll('#pem-term-rows > div');
+  const terms=[];
+  rows.forEach((row,i)=>{
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const rowId=row.id.replace('pm-row-','');
+    terms.push({id:rowId, label:inputs[0].value.trim()||`Termin ${i+1}`, dueDate:inputs[1].value||null, amount:parseFloat(inputs[2].value)||0, status:sel.value});
+  });
+  return terms;
+}
+
+function submitPemProject(){
+  const err=document.getElementById('pem-err');
+  const projId=document.getElementById('pem-proj-id').value;
+  const p=DB.get('projects').find(p=>p.id===projId);
+  if(!p){err.textContent='Project tidak ditemukan';return;}
+  const updated={...p,
+    totalValue:parseFloat(document.getElementById('pem-value').value)||p.totalValue,
+    contractDate:document.getElementById('pem-contract').value||p.contractDate,
+    handoverDate:document.getElementById('pem-handover').value||p.handoverDate,
+    notes:document.getElementById('pem-notes').value||p.notes,
+    terms:getPemTermRows()
+  };
+  DB.updateProject(projId,updated).then(()=>{
+    closeModal('proj-edit-modal');
+    toast('Project & payment terms diperbarui ✓','success');
+  }).catch(e=>{err.textContent='Gagal: '+e.message;});
+}
+
+function delAct(id){
+  if(!confirm('Hapus aktivitas ini?')) return;
+  DB.deleteActivity(id).then(()=>{
+    renderActivityTable(); toast('Aktivitas dihapus');
+  }).catch(e=>toast('Gagal hapus: '+e.message,'error'));
+}
+
+function markDone(id){
+  const r=DB.get('activities').find(a=>a.id===id); if(!r) return;
+  DB.updateActivity(id,{...r,statusFU:'Done'}).then(()=>{
+    renderActivityTable(); toast('Follow-up ditandai Done ✓');
+  }).catch(e=>toast('Gagal: '+e.message,'error'));
+}
+
+// ===== PROJECT CRUD =====
+const PAY_STATUS = {
+  'Pending':       {label:'Pending',       style:'background:rgba(100,116,139,.15);color:#94A3B8;border:1px solid rgba(100,116,139,.3)'},
+  'Invoice Sent':  {label:'Invoice Sent',  style:'background:rgba(234,179,8,.15);color:#FDE047;border:1px solid rgba(234,179,8,.3)'},
+  'Received':      {label:'Received',      style:'background:rgba(34,197,94,.15);color:#86EFAC;border:1px solid rgba(34,197,94,.3)'}
+};
+
+function renderIncomeSummary(projs){
+  const allTerms=projs.flatMap(p=>(p.terms||[]).map(t=>({...t,client:p.client})));
+  const totalValue=projs.reduce((s,p)=>s+(p.totalValue||0),0);
+  const received=allTerms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+  const invoiced=allTerms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+  const pending=allTerms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0);
+  const el=document.getElementById('income-summary');
+  el.innerHTML=[
+    {label:'Total Nilai Project',val:totalValue,c:'#F97316'},
+    {label:'✅ Received',val:received,c:'#22C55E'},
+    {label:'📄 Invoice Sent',val:invoiced,c:'#EAB308'},
+    {label:'⏳ Pending',val:pending,c:'#94A3B8'},
+    {label:'Collection Rate',val:totalValue?Math.round(received/totalValue*100)+'%':'-',c:'#3B82F6',raw:true}
+  ].map(s=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 18px">
+    <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">${s.label}</div>
+    <div style="font-size:${s.raw?'26px':'18px'};font-weight:700;color:${s.c};font-family:'JetBrains Mono',monospace;line-height:1">${s.raw?s.val:'Rp '+fmtIDR(s.val)}</div>
+  </div>`).join('');
+}
+
+function renderMonthlyTable(projs){
+  // Collect all payment terms, group by month
+  const allTerms=projs.flatMap(p=>(p.terms||[]).map(t=>({...t,client:p.client,salesName:p.salesName,projId:p.id})));
+  if(!allTerms.length){
+    document.getElementById('monthly-payment-table').innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">📅</div><p>Belum ada payment term.</p></div>`;
+    return;
+  }
+  // Filter by status dropdown (default: Invoice Sent)
+  const statusFilter=document.getElementById('payment-status-filter')?.value??'Invoice Sent';
+  const filtered=statusFilter?allTerms.filter(t=>t.status===statusFilter):allTerms;
+  if(!filtered.length){
+    document.getElementById('monthly-payment-table').innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">📅</div><p>Tidak ada payment dengan status "${statusFilter}".</p></div>`;
+    return;
+  }
+  // Sort by date
+  const sorted=[...filtered].sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1);
+  const t=tod();
+  const canChangeStatus=CU.role!=='finance';
+  let html=`<table>
+    <thead><tr>
+      <th>Client</th><th>Termin</th><th>Due Date</th><th>Nominal</th>
+      <th>Status</th><th>Keterangan</th>${canChangeStatus?'<th>Action</th>':''}
+    </tr></thead><tbody>`;
+  sorted.forEach(term=>{
+    const s=PAY_STATUS[term.status]||PAY_STATUS['Pending'];
+    const isOverdue=term.status!=='Received'&&term.dueDate&&term.dueDate<t;
+    html+=`<tr style="${isOverdue?'background:rgba(239,68,68,.04)':''}">
+      <td><div class="td-main">${term.client||'-'}</div><div class="td-sub">${term.salesName||''}</div></td>
+      <td style="font-size:13px">${term.label||'-'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;${isOverdue?'color:var(--red)':''}">${fmtDate(term.dueDate)}${isOverdue?' ⚠️':''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;white-space:nowrap">Rp ${fmtIDR(term.amount)}</td>
+      <td><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${s.style}">${s.label}</span></td>
+      <td style="font-size:12px;color:var(--text2);max-width:160px">${term.note||'-'}</td>
+      ${canChangeStatus?`<td>
+        <select style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:5px 8px;font-size:12px;font-family:'Sora',sans-serif;outline:none;width:130px" onchange="updateTermStatus('${term.projId}','${term.id}',this.value)">
+          ${Object.keys(PAY_STATUS).map(k=>`<option value="${k}" ${k===term.status?'selected':''}>${k}</option>`).join('')}
+        </select>
+      </td>`:''}
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('monthly-payment-table').innerHTML=html;
+}
+
+function renderMonthlyMatrix(){
+  const el=document.getElementById('monthly-matrix-table'); if(!el) return;
+  const selYear=parseInt(document.getElementById('matrix-year')?.value||new Date().getFullYear());
+  const projs=DB.get('projects');
+  if(!projs.length){
+    el.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">📊</div><p>Belum ada project.</p></div>`;
+    return;
+  }
+
+  // Build list of months that have any payment term in the selected year
+  const MONTH_NAMES=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  // Collect all months (0-11) that appear in terms for this year
+  const monthSet=new Set();
+  projs.forEach(p=>(p.terms||[]).forEach(t=>{
+    if(t.dueDate){
+      const d=new Date(t.dueDate);
+      if(d.getFullYear()===selYear) monthSet.add(d.getMonth());
+    }
+  }));
+  // If no terms this year, show all 12 months
+  const monthCols=monthSet.size>0?[...monthSet].sort((a,b)=>a-b):Array.from({length:12},(_,i)=>i);
+
+  // Build lookup: projId → month → { received, invoice, pending }
+  function projMonthAmounts(proj, month){
+    const terms=(proj.terms||[]).filter(t=>{
+      if(!t.dueDate) return false;
+      const d=new Date(t.dueDate);
+      return d.getFullYear()===selYear && d.getMonth()===month;
+    });
+    return {
+      received: terms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0),
+      invoice:  terms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0),
+      pending:  terms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0)
+    };
+  }
+
+  function cellHTML(amounts){
+    const {received,invoice,pending}=amounts;
+    if(!received&&!invoice&&!pending) return `<td class="matrix-month-col matrix-cell-empty">—</td>`;
+    let parts=[];
+    if(received) parts.push(`<span class="matrix-cell-received" style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap">Rp ${fmtIDR(received)}</span>`);
+    if(invoice)  parts.push(`<span class="matrix-cell-invoice" style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap">Rp ${fmtIDR(invoice)}</span>`);
+    if(pending)  parts.push(`<span class="matrix-cell-pending" style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap">Rp ${fmtIDR(pending)}</span>`);
+    return `<td class="matrix-month-col" style="vertical-align:middle;padding:8px 12px;white-space:nowrap">${parts.join(' ')}</td>`;
+  }
+
+  // Header row
+  let html=`<table style="min-width:unset">
+    <thead>
+      <tr>
+        <th style="min-width:160px;position:sticky;left:0;background:var(--navy2);z-index:2">Project / Client</th>
+        <th style="min-width:100px">Total Nilai</th>
+        ${monthCols.map(m=>`<th class="matrix-month-col">${MONTH_NAMES[m]} ${selYear}</th>`).join('')}
+        <th class="matrix-month-col">Total Invoice</th>
+        <th class="matrix-month-col">Total Received</th>
+        <th class="matrix-month-col">Sisa</th>
+      </tr>
+    </thead><tbody>`;
+
+  // Per-project rows
+  projs.forEach(p=>{
+    const totalValue=p.totalValue||0;
+    const totalReceived=(p.terms||[]).filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+    const totalInvoiced=(p.terms||[]).filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+    const sisa=totalValue-totalReceived;
+    html+=`<tr>
+      <td style="position:sticky;left:0;background:var(--navy2);z-index:1">
+        <div style="font-weight:600;font-size:13px">${p.client||'-'}</div>
+        <div style="font-size:11px;color:var(--text2)">${p.salesName||''}</div>
+      </td>
+     <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--orange);white-space:nowrap">Rp ${fmtIDR(totalValue)}</td>
+      ${monthCols.map(m=>cellHTML(projMonthAmounts(p,m))).join('')}
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--yellow);white-space:nowrap">${totalInvoiced?'Rp '+fmtIDR(totalInvoiced):'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--green);white-space:nowrap">Rp ${fmtIDR(totalReceived)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${sisa<=0?'var(--green)':'var(--yellow)'};white-space:nowrap">Rp ${fmtIDR(sisa)}</td>
+    </tr>`;
+  });
+
+  // Total rows
+  const totalAllValue=projs.reduce((s,p)=>s+(p.totalValue||0),0);
+  const totalAllReceived=projs.flatMap(p=>p.terms||[]).filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+  const totalAllInvoiced=projs.flatMap(p=>p.terms||[]).filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+
+  // Monthly totals per status
+  function monthTotals(month, status){
+    return projs.flatMap(p=>(p.terms||[]).filter(t=>{
+      if(!t.dueDate) return false;
+      const d=new Date(t.dueDate);
+      return d.getFullYear()===selYear && d.getMonth()===month && t.status===status;
+    })).reduce((s,t)=>s+(t.amount||0),0);
+  }
+
+  // Total Received row
+  html+=`<tr class="matrix-total-row">
+    <td style="position:sticky;left:0;background:var(--navy2);z-index:1;color:#86EFAC">✅ Total Received</td>
+    <td></td>
+    ${monthCols.map(m=>{
+      const v=monthTotals(m,'Received');
+      return `<td class="matrix-month-col" style="color:#86EFAC;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:nowrap">${v?'Rp '+fmtIDR(v):'—'}</td>`;
+    }).join('')}
+    <td></td>
+    <td style="color:#86EFAC;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;white-space:nowrap">Rp ${fmtIDR(totalAllReceived)}</td>
+    <td></td>
+  </tr>`;
+
+  // Total Invoice Sent row
+  html+=`<tr class="matrix-total-row">
+    <td style="position:sticky;left:0;background:var(--navy2);z-index:1;color:#FDE047">📄 Total Invoice Sent</td>
+    <td></td>
+    ${monthCols.map(m=>{
+      const v=monthTotals(m,'Invoice Sent');
+      return `<td class="matrix-month-col" style="color:#FDE047;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:nowrap">${v?'Rp '+fmtIDR(v):'—'}</td>`;
+    }).join('')}
+    <td style="color:#FDE047;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;white-space:nowrap">Rp ${fmtIDR(totalAllInvoiced)}</td>
+    <td></td><td></td>
+  </tr>`;
+
+  // Total Pending row
+  html+=`<tr class="matrix-total-row">
+    <td style="position:sticky;left:0;background:var(--navy2);z-index:1;color:#94A3B8">⏳ Total Pending</td>
+    <td></td>
+    ${monthCols.map(m=>{
+      const v=monthTotals(m,'Pending');
+      return `<td class="matrix-month-col" style="color:#94A3B8;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:nowrap">${v?'Rp '+fmtIDR(v):'—'}</td>`;
+    }).join('')}
+    <td></td><td></td><td></td>
+  </tr>`;
+
+  html+=`</tbody></table>`;
+  el.innerHTML=html;
+}
+
+function downloadMatrixPDF(){
+  const selYear=document.getElementById('matrix-year')?.value||new Date().getFullYear();
+  const projs=DB.get('projects');
+  const MONTH_NAMES=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  // Collect months
+  const monthSet=new Set();
+  projs.forEach(p=>(p.terms||[]).forEach(t=>{
+    if(t.dueDate){const d=new Date(t.dueDate);if(d.getFullYear()===parseInt(selYear))monthSet.add(d.getMonth());}
+  }));
+  const monthCols=monthSet.size>0?[...monthSet].sort((a,b)=>a-b):Array.from({length:12},(_,i)=>i);
+
+  function projMonthAmounts(proj,month){
+    const terms=(proj.terms||[]).filter(t=>{
+      if(!t.dueDate)return false;
+      const d=new Date(t.dueDate);
+      return d.getFullYear()===parseInt(selYear)&&d.getMonth()===month;
+    });
+    return{
+      received:terms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0),
+      invoice:terms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0),
+      pending:terms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0)
+    };
+  }
+
+  function cellContent(amounts){
+    const{received,invoice,pending}=amounts;
+    if(!received&&!invoice&&!pending) return '<span style="color:#999">—</span>';
+    let parts=[];
+    if(received) parts.push(`<div class="c-received">Rp ${fmtIDR(received)}</div>`);
+    if(invoice)  parts.push(`<div class="c-invoice">Rp ${fmtIDR(invoice)}</div>`);
+    if(pending)  parts.push(`<div class="c-pending">Rp ${fmtIDR(pending)}</div>`);
+    return parts.join(' ');
+  }
+
+  function monthTotals(month,status){
+    return projs.flatMap(p=>(p.terms||[]).filter(t=>{
+      if(!t.dueDate)return false;
+      const d=new Date(t.dueDate);
+      return d.getFullYear()===parseInt(selYear)&&d.getMonth()===month&&t.status===status;
+    })).reduce((s,t)=>s+(t.amount||0),0);
+  }
+
+  const totalAllReceived=projs.flatMap(p=>p.terms||[]).filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+  const totalAllValue=projs.reduce((s,p)=>s+(p.totalValue||0),0);
+  const generatedDate=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+  // Build table rows HTML
+  let bodyRows='';
+  projs.forEach(p=>{
+    const totalReceived=(p.terms||[]).filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+    const sisa=(p.totalValue||0)-totalReceived;
+    bodyRows+=`<tr>
+      <td class="col-project"><strong>${p.client||'-'}</strong><br><span class="sub">${p.salesName||''}</span></td>
+      <td class="col-num">Rp ${fmtIDR(p.totalValue||0)}</td>
+      ${monthCols.map(m=>`<td class="col-month">${cellContent(projMonthAmounts(p,m))}</td>`).join('')}
+      <td class="col-num c-received-bold">Rp ${fmtIDR(totalReceived)}</td>
+      <td class="col-num" style="color:${sisa<=0?'#16a34a':'#d97706'}">Rp ${fmtIDR(sisa)}</td>
+    </tr>`;
+  });
+
+  const html=`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Monthly Payment Summary ${selYear}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a2e;background:#fff;padding:28px 32px;}
+  
+  /* HEADER */
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #0B1628;}
+  .logo-row{display:flex;align-items:center;gap:10px;}
+  .logo-dot{width:30px;height:30px;background:#F97316;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;}
+  .company{font-size:16px;font-weight:700;color:#0B1628;}
+  .company em{color:#F97316;font-style:normal;}
+  .report-title{text-align:right;}
+  .report-title h1{font-size:18px;font-weight:700;color:#0B1628;margin-bottom:4px;}
+  .report-title p{font-size:11px;color:#64748B;}
+
+  /* SUMMARY CARDS */
+  .summary{display:flex;gap:12px;margin-bottom:24px;}
+  .card{flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;}
+  .card-label{font-size:10px;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .card-val{font-size:16px;font-weight:700;font-family:'Courier New',monospace;}
+  .card-val.orange{color:#F97316;}
+  .card-val.green{color:#16a34a;}
+  .card-val.blue{color:#2563EB;}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  th{background:#0B1628;color:#F1F5F9;padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+  th.right{text-align:right;}
+  td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+  tr:nth-child(even) td{background:#f8fafc;}
+  tr:hover td{background:#f1f5f9;}
+  .col-project{min-width:140px;}
+  .col-num{text-align:right;font-family:'Courier New',monospace;font-size:11px;white-space:nowrap;}
+  .col-month{text-align:right;min-width:105px;}
+  .sub{font-size:10px;color:#64748B;}
+
+  /* STATUS COLORS */
+  .c-received{color:#16a34a;font-weight:600;font-family:'Courier New',monospace;font-size:10px;}
+  .c-invoice{color:#d97706;font-weight:600;font-family:'Courier New',monospace;font-size:10px;}
+  .c-pending{color:#64748B;font-weight:600;font-family:'Courier New',monospace;font-size:10px;}
+  .c-received-bold{color:#16a34a;font-weight:700;}
+
+  /* TOTAL ROWS */
+  .total-received td{background:#f0fdf4!important;border-top:2px solid #16a34a;font-weight:700;color:#16a34a;}
+  .total-invoice td{background:#fffbeb!important;border-top:1px solid #d97706;font-weight:700;color:#d97706;}
+  .total-pending td{background:#f8fafc!important;border-top:1px solid #94a3b8;font-weight:700;color:#64748B;}
+
+  /* LEGEND */
+  .legend{display:flex;gap:20px;margin-bottom:20px;padding:10px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:#475569;}
+  .legend-dot{width:10px;height:10px;border-radius:3px;}
+
+  /* FOOTER */
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;}
+
+  @media print{
+    body{padding:16px;}
+    @page{size:A4 landscape;margin:16mm;}
+    .no-print{display:none!important;}
+    button{display:none!important;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-dot">S</div>
+      <div>
+        <div class="company">Sprout <em>Sales</em> Tracker</div>
+        <div style="font-size:10px;color:#64748B">Internal Report</div>
+      </div>
+    </div>
+    <div class="report-title">
+      <h1>Monthly Payment Summary</h1>
+      <p>Tahun ${selYear} &nbsp;·&nbsp; Dibuat: ${generatedDate}</p>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary">
+    <div class="card">
+      <div class="card-label">Total Nilai Project</div>
+      <div class="card-val orange">Rp ${fmtIDR(totalAllValue)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total Received</div>
+      <div class="card-val green">Rp ${fmtIDR(totalAllReceived)}</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Collection Rate</div>
+      <div class="card-val blue">${totalAllValue?Math.round(totalAllReceived/totalAllValue*100):0}%</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total Project</div>
+      <div class="card-val orange">${projs.length}</div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#bbf7d0"></span>Received — Pembayaran sudah diterima</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fde68a"></span>Invoice Sent — Invoice sudah dikirim</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e2e8f0"></span>Pending — Belum ditagih</div>
+  </div>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>Project / Client</th>
+        <th class="right">Total Nilai</th>
+        ${monthCols.map(m=>`<th class="right">${MONTH_NAMES[m]} ${selYear}</th>`).join('')}
+        <th class="right">Total Received</th>
+        <th class="right">Sisa</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bodyRows}
+      <!-- Total Received Row -->
+      <tr class="total-received">
+        <td>✅ Total Received</td>
+        <td></td>
+        ${monthCols.map(m=>{const v=monthTotals(m,'Received');return`<td class="col-num">${v?'Rp '+fmtIDR(v):'—'}</td>`;}).join('')}
+        <td class="col-num">Rp ${fmtIDR(totalAllReceived)}</td>
+        <td></td>
+      </tr>
+      <!-- Total Invoice Row -->
+      <tr class="total-invoice">
+        <td>📄 Total Invoice Sent</td>
+        <td></td>
+        ${monthCols.map(m=>{const v=monthTotals(m,'Invoice Sent');return`<td class="col-num">${v?'Rp '+fmtIDR(v):'—'}</td>`;}).join('')}
+        <td></td><td></td>
+      </tr>
+      <!-- Total Pending Row -->
+      <tr class="total-pending">
+        <td>⏳ Total Pending</td>
+        <td></td>
+        ${monthCols.map(m=>{const v=monthTotals(m,'Pending');return`<td class="col-num">${v?'Rp '+fmtIDR(v):'—'}</td>`;}).join('')}
+        <td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>Sprout Sales Tracker &nbsp;·&nbsp; Confidential</span>
+    <span>Dicetak: ${generatedDate}</span>
+  </div>
+
+  <script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+  const win=window.open('','_blank','width=1200,height=800');
+  win.document.write(html);
+  win.document.close();
+  toast('PDF siap di-print / save ✓','success');
+}
+
+function updateTermStatus(projId, termId, newStatus){
+  const p=DB.get('projects').find(p=>p.id===projId); if(!p) return;
+  const terms=p.terms.map(t=>t.id===termId?{...t,status:newStatus}:t);
+  DB.updateProject(projId,{...p,terms}).then(()=>{
+    renderProjects(); toast(`Status diubah ke "${newStatus}" ✓`);
+  }).catch(e=>toast('Gagal: '+e.message,'error'));
+}
+
+function renderProjects(){
+  let projs=myProjs();
+  const q=(document.getElementById('fp-search')?.value||'').toLowerCase();
+  const sn=document.getElementById('fp-sales')?.value||'';
+  const sf=document.getElementById('fp-status-filter')?.value||'';
+  if(q)  projs=projs.filter(p=>(p.client||'').toLowerCase().includes(q));
+  if(sn) projs=projs.filter(p=>p.salesName===sn);
+  if(sf==='completed') projs=projs.filter(p=>(p.terms||[]).length>0&&(p.terms||[]).every(t=>t.status==='Received'));
+  if(sf==='active')    projs=projs.filter(p=>(p.terms||[]).length===0||(p.terms||[]).some(t=>t.status!=='Received'));
+  const sorted=[...projs].sort((a,b)=>b.createdAt>a.createdAt?1:-1);
+
+  const allProjs=myProjs();
+  renderIncomeSummary(allProjs);
+  renderMonthlyTable(sorted);
+  if(CU.role==='admin'||CU.role==='finance') renderMonthlyMatrix();
+
+  const canEdit=CU.role!=='finance';
+  const canDel=CU.role==='admin';
+  const body=document.getElementById('proj-body');
+  if(!sorted.length){body.innerHTML=`<div class="empty-state"><div class="icon">🚀</div><p>Belum ada project.</p></div>`;return;}
+
+  body.innerHTML='<div class="project-grid">'+sorted.map(p=>{
+    const terms=p.terms||[];
+    const totalValue=p.totalValue||0;
+    const received=terms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+    const invoiced=terms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+    const pending=terms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0);
+    const pct=totalValue>0?Math.round(received/totalValue*100):0;
+    const allDone=terms.length>0&&terms.every(t=>t.status==='Received');
+    const t=tod();
+
+    return `<div class="project-card">
+      <!-- Card Header -->
+      <div class="project-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="project-name">${p.client||'Unknown'}</div>
+            ${allDone?`<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:rgba(34,197,94,.15);color:#86EFAC;border:1px solid rgba(34,197,94,.3)">LUNAS ✓</span>`:''}
+          </div>
+          <div class="project-sales">Sales: ${p.salesName||'-'} ${p.contractDate?'· Contract: '+fmtDate(p.contractDate):''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${canEdit?`<button class="btn btn-ghost btn-sm" onclick="editProj('${p.id}')">Edit</button>`:''} ${canDel?`<button class="btn btn-danger btn-sm" onclick="delProj('${p.id}')">Del</button>`:''}
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px">
+          <span>Collection Progress</span>
+          <span style="font-weight:600;color:${pct===100?'var(--green)':'var(--orange)'}">${pct}% · Rp ${fmtIDR(received)} / Rp ${fmtIDR(totalValue)}</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden">
+          <div style="background:${pct===100?'var(--green)':'var(--orange)'};height:6px;border-radius:4px;width:${pct}%;transition:width .5s"></div>
+        </div>
+      </div>
+
+      <!-- Income Mini Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">
+        <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 12px;text-align:center">
+          <div style="font-size:10px;color:#86EFAC;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Received</div>
+          <div style="font-size:13px;font-weight:700;color:#86EFAC;font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(received)}</div>
+        </div>
+        <div style="background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:10px 12px;text-align:center">
+          <div style="font-size:10px;color:#FDE047;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Invoice</div>
+          <div style="font-size:13px;font-weight:700;color:#FDE047;font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(invoiced)}</div>
+        </div>
+        <div style="background:rgba(100,116,139,.07);border:1px solid rgba(100,116,139,.2);border-radius:8px;padding:10px 12px;text-align:center">
+          <div style="font-size:10px;color:#94A3B8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Pending</div>
+          <div style="font-size:13px;font-weight:700;color:#94A3B8;font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(pending)}</div>
+        </div>
+      </div>
+
+      <!-- Payment Terms Table -->
+      ${terms.length>0?`
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <table style="min-width:unset">
+          <thead><tr>
+            <th style="padding:8px 12px">Termin</th>
+            <th style="padding:8px 12px">Due Date</th>
+            <th style="padding:8px 12px">Nominal</th>
+            <th style="padding:8px 12px">Status</th>
+            ${canEdit?'<th style="padding:8px 12px">Ubah</th>':''}
+          </tr></thead>
+          <tbody>
+          ${terms.map(term=>{
+            const s=PAY_STATUS[term.status]||PAY_STATUS['Pending'];
+            const isOver=term.status!=='Received'&&term.dueDate&&term.dueDate<t;
+            return `<tr style="${isOver?'background:rgba(239,68,68,.04)':''}">
+              <td style="padding:9px 12px;font-size:13px">${term.label||'-'}</td>
+              <td style="padding:9px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;${isOver?'color:var(--red)':''}">${fmtDate(term.dueDate)}${isOver?' ⚠️':''}</td>
+              <td style="padding:9px 12px;font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;white-space:nowrap">Rp ${fmtIDR(term.amount)}</td>
+              <td style="padding:9px 12px"><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;${s.style}">${s.label}</span></td>
+              ${canEdit?`<td style="padding:9px 12px">
+                <select style="background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px;font-family:'Sora',sans-serif;outline:none" onchange="updateTermStatus('${p.id}','${term.id}',this.value)">
+                  ${Object.keys(PAY_STATUS).map(k=>`<option value="${k}" ${k===term.status?'selected':''}>${k}</option>`).join('')}
+                </select>
+              </td>`:''}
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+      </div>`:`<div style="text-align:center;padding:16px;font-size:13px;color:var(--text3)">Belum ada payment term</div>`}
+
+      ${p.handoverDate?`<div style="margin-top:12px;font-size:12px;color:var(--text2)">🚀 Handover: <strong>${fmtDate(p.handoverDate)}</strong></div>`:''}
+      ${p.notes?`<div style="margin-top:8px;font-size:12px;color:var(--text2);padding-top:10px;border-top:1px solid var(--border)">${p.notes}</div>`:''}
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// Payment term row counter
+let termRowCount=0;
+function addPaymentTermRow(prefill){
+  termRowCount++;
+  const id=prefill?prefill.id:'term_'+termRowCount;
+  const container=document.getElementById('payment-terms-rows');
+  const div=document.createElement('div');
+  div.id='term-row-'+id;
+  div.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:10px;align-items:end';
+  div.innerHTML=`
+    <div class="form-group" style="margin:0">
+      <label>Label Termin</label>
+      <input type="text" value="${prefill?prefill.label:'DP '+termRowCount}" placeholder="DP, Termin 1...">
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Due Date</label>
+      <input type="date" value="${prefill?prefill.dueDate||'':''}">
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Nominal (IDR)</label>
+      <input type="number" value="${prefill?prefill.amount||'':''}" placeholder="0" oninput="recalcRemaining()">
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Status</label>
+      <select>
+        ${Object.keys(PAY_STATUS).map(k=>`<option value="${k}" ${prefill&&prefill.status===k?'selected':''}>${k}</option>`).join('')}
+      </select>
+    </div>
+    <button type="button" onclick="removeTermRow('${id}')" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:14px;margin-bottom:0;align-self:end">✕</button>`;
+  div.querySelector('input[type=number]')._termId=id;
+  container.appendChild(div);
+  recalcRemaining();
+}
+
+function removeTermRow(id){
+  const el=document.getElementById('term-row-'+id);
+  if(el) el.remove();
+  recalcRemaining();
+}
+
+function recalcRemaining(){
+  const total=parseFloat(document.getElementById('fp-total-value')?.value)||0;
+  const rows=document.querySelectorAll('#payment-terms-rows > div');
+  let sumTerms=0;
+  rows.forEach(row=>{
+    const inp=row.querySelector('input[type=number]');
+    sumTerms+=parseFloat(inp?.value||0);
+  });
+  const remaining=total-sumTerms;
+  const label=document.getElementById('remaining-label');
+  if(label){
+    if(!total){ label.textContent='Isi nilai project dulu'; return; }
+    label.textContent=`Rp ${fmtIDR(remaining)}`;
+    label.style.color=remaining<0?'var(--red)':remaining===0?'var(--green)':'var(--orange)';
+  }
+}
+
+function getTermRows(){
+  const rows=document.querySelectorAll('#payment-terms-rows > div');
+  const terms=[];
+  rows.forEach((row,i)=>{
+    const inputs=row.querySelectorAll('input');
+    const sel=row.querySelector('select');
+    const rowId=row.id.replace('term-row-','');
+    terms.push({
+      id:rowId,
+      label:inputs[0].value.trim()||`Termin ${i+1}`,
+      dueDate:inputs[1].value||null,
+      amount:parseFloat(inputs[2].value)||0,
+      status:sel.value
+    });
+  });
+  return terms;
+}
+
+function resetProjForm(){
+  document.getElementById('edit-proj-id').value='';
+  document.getElementById('fp-linked-act-id').value='';
+  document.getElementById('form-proj-title').textContent='Tambah Project';
+  const banner=document.getElementById('win-form-banner');
+  if(banner){banner.style.display='none';banner.innerHTML='';}
+  ['fp-client','fp-notes','fp-contract','fp-handover','fp-total-value'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('fp-sales-name').value=CU.role==='sales'?CU.name:'';
+  document.getElementById('proj-err').textContent='';
+  document.getElementById('payment-terms-rows').innerHTML='';
+  document.getElementById('remaining-label').textContent='—';
+  termRowCount=0;
+  addPaymentTermRow();
+}
+
+function submitProject(){
+  const err=document.getElementById('proj-err');
+  const client=document.getElementById('fp-client').value.trim();
+  if(!client){err.textContent='Masukkan nama client';return;}
+  const eid=document.getElementById('edit-proj-id').value;
+  const linkedActId=document.getElementById('fp-linked-act-id').value;
+  const rec={
+    client,
+    salesName:document.getElementById('fp-sales-name').value||CU.name,
+    totalValue:parseFloat(document.getElementById('fp-total-value').value)||0,
+    notes:document.getElementById('fp-notes').value||null,
+    contractDate:document.getElementById('fp-contract').value||null,
+    handoverDate:document.getElementById('fp-handover').value||null,
+    terms:getTermRows()
+  };
+  const btn=document.querySelector('#page-add-project .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Menyimpan...';}
+  const doSave = eid ? DB.updateProject(eid,rec) : DB.createProject(rec);
+  doSave.then(saved=>{
+    if(!eid && linkedActId){
+      const actRec=DB.get('activities').find(a=>a.id===linkedActId);
+      if(actRec) return DB.updateActivity(linkedActId,{...actRec,projectId:saved.id,potential:'Win',statusFU:'Win'})
+        .then(()=>{ toast('🏆 Project dibuat & ter-link ke Win!','success'); return saved; });
+    }
+    toast(eid?'Project diperbarui ✓':'Project tersimpan ✓');
+    return saved;
+  }).then(()=>{ showPage('projects'); })
+  .catch(e=>{err.textContent='Gagal: '+e.message;})
+  .finally(()=>{ if(btn){btn.disabled=false;btn.textContent='💾 Simpan';} });
+}
+
+function editProj(id){
+  const p=DB.get('projects').find(p=>p.id===id); if(!p) return;
+  showPage('add-project');
+  document.getElementById('fp-linked-act-id').value='';
+  const banner=document.getElementById('win-form-banner');
+  if(banner){banner.style.display='none';banner.innerHTML='';}
+  document.getElementById('edit-proj-id').value=id;
+  document.getElementById('form-proj-title').textContent='Edit Project — '+p.client;
+  document.getElementById('fp-client').value=p.client||'';
+  document.getElementById('fp-sales-name').value=p.salesName||'';
+  document.getElementById('fp-notes').value=p.notes||'';
+  document.getElementById('fp-contract').value=p.contractDate||'';
+  document.getElementById('fp-handover').value=p.handoverDate||'';
+  document.getElementById('fp-total-value').value=p.totalValue||'';
+  document.getElementById('payment-terms-rows').innerHTML='';
+  termRowCount=0;
+  (p.terms||[]).forEach(t=>addPaymentTermRow(t));
+  if(!(p.terms||[]).length) addPaymentTermRow();
+  recalcRemaining();
+}
+
+function delProj(id){
+  if(!confirm('Hapus project ini?')) return;
+  DB.deleteProject(id).then(()=>{ renderProjects(); toast('Project dihapus'); })
+  .catch(e=>toast('Gagal hapus: '+e.message,'error'));
+}
+
+// ===== MONTHLY SUMMARIES =====
+function renderMonthlySummaries(){
+  if(CU.role!=='admin'&&CU.role!=='finance') return;
+  const msEl=document.getElementById('ms-month');
+  if(!msEl) return;
+  if(!msEl.value) msEl.value=mon();
+  const selMonth=msEl.value; // YYYY-MM
+  const [sy,sm]=selMonth.split('-').map(Number);
+  const selMonthStart=selMonth+'-01';
+  const lastDay=new Date(sy,sm,0).getDate();
+  const selMonthEnd=`${selMonth}-${String(lastDay).padStart(2,'0')}`;
+
+  const projs=DB.get('projects');
+  const allTerms=projs.flatMap(p=>(p.terms||[]).map(t=>({...t,client:p.client,salesName:p.salesName,projId:p.id})));
+
+  // Terms due in the selected month
+  const curTerms=allTerms.filter(t=>t.dueDate&&t.dueDate>=selMonthStart&&t.dueDate<=selMonthEnd);
+  // Carryover: invoice already sent to client but not paid, due before selected month
+  // Also includes Invoice Sent terms with no dueDate (undated = outstanding)
+  const carryTerms=allTerms.filter(t=>t.status==='Invoice Sent'&&(!t.dueDate||t.dueDate<selMonthStart));
+  // Pending belum diinvoice: terms that are past due but still Pending (no invoice sent yet)
+  const pendingOldTerms=allTerms.filter(t=>t.status==='Pending'&&(!t.dueDate||t.dueDate<selMonthStart));
+
+  const curReceived=curTerms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+  const curInvoiced=curTerms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+  const curPending=curTerms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0);
+  const carryTotal=carryTerms.reduce((s,t)=>s+(t.amount||0),0);
+  const pendingOldTotal=pendingOldTerms.reduce((s,t)=>s+(t.amount||0),0);
+  // Optimistic estimate: already received + invoiced (client may still pay this month)
+  const estimatedReceived=curReceived+curInvoiced;
+  // Worst-case next month risk: if invoiced & pending this month + carryover + past pending all unsettled
+  const nextMonthRisk=curInvoiced+curPending+carryTotal+pendingOldTotal;
+
+  const MONTH_NAMES_FULL=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const monthLabel=MONTH_NAMES_FULL[sm-1]+' '+sy;
+  const titleEl=document.getElementById('ms-cur-title');
+  if(titleEl) titleEl.textContent='Tagihan '+monthLabel;
+
+  // KPI cards
+  document.getElementById('ms-kpi').innerHTML=[
+    {label:'Estimasi Received Bulan Ini',hint:'Received + Invoice Sent (optimistis)',val:estimatedReceived,c:'var(--green)'},
+    {label:'Sudah Diterima',hint:'Status: Received',val:curReceived,c:'var(--green)'},
+    {label:'Invoice Sent',hint:'Sudah diinvoice, menunggu bayar',val:curInvoiced,c:'var(--yellow)'},
+    {label:'Pending Bulan Ini',hint:'Belum diinvoice bulan ini',val:curPending,c:'var(--text2)'},
+    {label:'Carryover Invoice Belum Bayar',hint:'Invoice Sent dari bulan sebelumnya, belum dibayar',val:carryTotal,c:'var(--red)'},
+    {label:'Pending Belum Diinvoice',hint:'Termin jatuh tempo bulan lalu, belum dibuatkan invoice',val:pendingOldTotal,c:'var(--yellow)'},
+    {label:'Risk Bulan Depan',hint:'Total semua yang belum settle jika tidak ada pembayaran',val:nextMonthRisk,c:'var(--orange)'},
+  ].map(s=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-height:110px;min-width:0">
+    <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;line-height:1.4">${s.label}</div>
+    <div style="font-size:15px;font-weight:700;color:${s.c};font-family:'JetBrains Mono',monospace;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Rp ${fmtIDR(s.val)}">Rp ${fmtIDR(s.val)}</div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.4;margin-top:auto">${s.hint}</div>
+  </div>`).join('');
+
+  // Current month terms table
+  const curEl=document.getElementById('ms-cur-table');
+  if(!curTerms.length){
+    curEl.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">📅</div><p>Tidak ada tagihan di ${monthLabel}.</p></div>`;
+  } else {
+    const sorted=[...curTerms].sort((a,b)=>(a.dueDate||'')>(b.dueDate||'')?1:-1);
+    const today=tod();
+    let h=`<table><thead><tr><th>Client</th><th>Termin</th><th>Due Date</th><th>Nominal</th><th>Status</th></tr></thead><tbody>`;
+    sorted.forEach(t=>{
+      const s=PAY_STATUS[t.status]||PAY_STATUS['Pending'];
+      const isOver=t.status!=='Received'&&t.dueDate&&t.dueDate<today;
+      h+=`<tr style="${isOver?'background:rgba(239,68,68,.04)':''}">
+        <td><div class="td-main">${t.client||'-'}</div><div class="td-sub">${t.salesName||''}</div></td>
+        <td style="font-size:13px">${t.label||'-'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;${isOver?'color:var(--red)':''}">${fmtDate(t.dueDate)}${isOver?' ⚠️':''}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;white-space:nowrap">Rp ${fmtIDR(t.amount)}</td>
+        <td><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${s.style}">${s.label}</span></td>
+      </tr>`;
+    });
+    // Summary row
+    h+=`<tr style="border-top:2px solid var(--border2)">
+      <td colspan="3" style="font-weight:600;font-size:12px;color:var(--text2)">Total ${monthLabel}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;white-space:nowrap;color:var(--orange)">Rp ${fmtIDR(curReceived+curInvoiced+curPending)}</td>
+      <td></td>
+    </tr>`;
+    h+='</tbody></table>';
+    curEl.innerHTML=h;
+  }
+
+  // Carryover table — grouped by client with per-term breakdown
+  const carryEl=document.getElementById('ms-carry-table');
+  if(!carryTerms.length){
+    carryEl.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">✅</div><p>Tidak ada carryover — semua tagihan lama sudah terbayar!</p></div>`;
+  } else {
+    // Group by client, sort each group by dueDate asc
+    const groups={};
+    carryTerms.forEach(t=>{
+      const key=t.client||'Unknown';
+      if(!groups[key]) groups[key]={client:t.client,salesName:t.salesName,terms:[]};
+      groups[key].terms.push(t);
+    });
+    // Sort groups by descending subtotal so biggest exposure is on top
+    const groupList=Object.values(groups).sort((a,b)=>{
+      const sa=a.terms.reduce((s,t)=>s+(t.amount||0),0);
+      const sb=b.terms.reduce((s,t)=>s+(t.amount||0),0);
+      return sb-sa;
+    });
+    groupList.forEach(g=>g.terms.sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1));
+
+    function daysOverdue(dueDate){
+      if(!dueDate) return null;
+      const diff=Math.floor((new Date(tod())-new Date(dueDate))/(1000*60*60*24));
+      return diff>0?diff:null;
+    }
+
+    let h=`<table style="min-width:unset">
+      <thead><tr>
+        <th style="min-width:180px">Project / Client</th>
+        <th>Termin</th>
+        <th>Due Date</th>
+        <th style="text-align:right">Hari Terlambat</th>
+        <th style="text-align:right">Nominal</th>
+        <th style="text-align:right">% dari Total</th>
+      </tr></thead><tbody>`;
+
+    groupList.forEach(g=>{
+      const subtotal=g.terms.reduce((s,t)=>s+(t.amount||0),0);
+      const pct=carryTotal?Math.round(subtotal/carryTotal*100):0;
+      // Client header row
+      h+=`<tr style="background:rgba(239,68,68,.08);border-top:1px solid rgba(239,68,68,.25)">
+        <td colspan="4" style="padding:10px 16px">
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${g.client||'Unknown'}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${g.salesName||''} &nbsp;·&nbsp; ${g.terms.length} termin belum dibayar</div>
+        </td>
+        <td style="padding:10px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--red);white-space:nowrap">Rp ${fmtIDR(subtotal)}</td>
+        <td style="padding:10px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--orange)">${pct}%</td>
+      </tr>`;
+      // Per-term rows
+      g.terms.forEach(t=>{
+        const overdueDays=daysOverdue(t.dueDate);
+        const termPct=carryTotal?Math.round((t.amount||0)/carryTotal*100):0;
+        h+=`<tr style="background:rgba(239,68,68,.02)">
+          <td style="padding:8px 16px 8px 28px;font-size:12px;color:var(--text3)">↳</td>
+          <td style="padding:8px 12px;font-size:13px;color:var(--text)">${t.label||'-'}</td>
+          <td style="padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;${t.dueDate?'color:var(--red)':'color:var(--text3)'}">${t.dueDate?fmtDate(t.dueDate):'Tidak ada due date'}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;${overdueDays?'color:var(--red)':'color:var(--text3)'}">${overdueDays?overdueDays+' hari':'—'}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap">Rp ${fmtIDR(t.amount)}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">${termPct>0?termPct+'%':'<1%'}</td>
+        </tr>`;
+      });
+    });
+
+    // Grand total row
+    h+=`<tr style="border-top:2px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08)">
+      <td colspan="4" style="padding:12px 16px;font-weight:700;font-size:13px;color:var(--red)">🔴 Total Carryover — ${groupList.length} client</td>
+      <td style="padding:12px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--red);white-space:nowrap">Rp ${fmtIDR(carryTotal)}</td>
+      <td style="padding:12px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text2)">100%</td>
+    </tr>`;
+    h+='</tbody></table>';
+    carryEl.innerHTML=h;
+  }
+
+  // Pending belum diinvoice table — grouped by client
+  const pendingEl=document.getElementById('ms-pending-table');
+  if(!pendingOldTerms.length){
+    pendingEl.innerHTML=`<div class="empty-state" style="padding:24px"><div class="icon">✅</div><p>Tidak ada termin pending dari bulan sebelumnya — semua sudah diinvoice!</p></div>`;
+  } else {
+    const pGroups={};
+    pendingOldTerms.forEach(t=>{
+      const key=t.client||'Unknown';
+      if(!pGroups[key]) pGroups[key]={client:t.client,salesName:t.salesName,terms:[]};
+      pGroups[key].terms.push(t);
+    });
+    const pGroupList=Object.values(pGroups).sort((a,b)=>{
+      const sa=a.terms.reduce((s,t)=>s+(t.amount||0),0);
+      const sb=b.terms.reduce((s,t)=>s+(t.amount||0),0);
+      return sb-sa;
+    });
+    pGroupList.forEach(g=>g.terms.sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1));
+
+    function daysOverduePend(dueDate){
+      if(!dueDate) return null;
+      const diff=Math.floor((new Date(tod())-new Date(dueDate))/(1000*60*60*24));
+      return diff>0?diff:null;
+    }
+
+    let ph=`<table style="min-width:unset">
+      <thead><tr>
+        <th style="min-width:180px">Project / Client</th>
+        <th>Termin</th>
+        <th>Due Date</th>
+        <th style="text-align:right">Hari Terlambat</th>
+        <th style="text-align:right">Nominal</th>
+        <th style="text-align:right">% dari Total</th>
+      </tr></thead><tbody>`;
+
+    pGroupList.forEach(g=>{
+      const subtotal=g.terms.reduce((s,t)=>s+(t.amount||0),0);
+      const pct=pendingOldTotal?Math.round(subtotal/pendingOldTotal*100):0;
+      ph+=`<tr style="background:rgba(234,179,8,.08);border-top:1px solid rgba(234,179,8,.2)">
+        <td colspan="4" style="padding:10px 16px">
+          <div style="font-weight:700;font-size:13px;color:var(--text)">${g.client||'Unknown'}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${g.salesName||''} &nbsp;·&nbsp; ${g.terms.length} termin belum diinvoice</div>
+        </td>
+        <td style="padding:10px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--yellow);white-space:nowrap">Rp ${fmtIDR(subtotal)}</td>
+        <td style="padding:10px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--orange)">${pct}%</td>
+      </tr>`;
+      g.terms.forEach(t=>{
+        const overdueDays=daysOverduePend(t.dueDate);
+        const termPct=pendingOldTotal?Math.round((t.amount||0)/pendingOldTotal*100):0;
+        ph+=`<tr style="background:rgba(234,179,8,.02)">
+          <td style="padding:8px 16px 8px 28px;font-size:12px;color:var(--text3)">↳</td>
+          <td style="padding:8px 12px;font-size:13px;color:var(--text)">${t.label||'-'}</td>
+          <td style="padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;${t.dueDate?'color:var(--yellow)':'color:var(--text3)'}">${t.dueDate?fmtDate(t.dueDate):'Tidak ada due date'}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;${overdueDays?'color:var(--yellow)':'color:var(--text3)'}">${overdueDays?overdueDays+' hari':'—'}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap">Rp ${fmtIDR(t.amount)}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">${termPct>0?termPct+'%':'<1%'}</td>
+        </tr>`;
+      });
+    });
+
+    ph+=`<tr style="border-top:2px solid rgba(234,179,8,.4);background:rgba(234,179,8,.08)">
+      <td colspan="4" style="padding:12px 16px;font-weight:700;font-size:13px;color:var(--yellow)">⏳ Total Pending Belum Diinvoice — ${pGroupList.length} client</td>
+      <td style="padding:12px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--yellow);white-space:nowrap">Rp ${fmtIDR(pendingOldTotal)}</td>
+      <td style="padding:12px 16px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text2)">100%</td>
+    </tr>`;
+    ph+='</tbody></table>';
+    pendingEl.innerHTML=ph;
+  }
+}
+
+function downloadMonthlySummaryPDF(){
+  const msEl=document.getElementById('ms-month');
+  if(!msEl||!msEl.value){toast('Pilih bulan terlebih dahulu','error');return;}
+  const selMonth=msEl.value;
+  const [sy,sm]=selMonth.split('-').map(Number);
+  const MONTH_NAMES_FULL=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const monthLabel=MONTH_NAMES_FULL[sm-1]+' '+sy;
+  const generatedDate=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+  const projs=DB.get('projects');
+  const selMonthStart=selMonth+'-01';
+  const lastDay=new Date(sy,sm,0).getDate();
+  const selMonthEnd=`${selMonth}-${String(lastDay).padStart(2,'0')}`;
+  const allTerms=projs.flatMap(p=>(p.terms||[]).map(t=>({...t,client:p.client,salesName:p.salesName})));
+
+  const curTerms=allTerms.filter(t=>t.dueDate&&t.dueDate>=selMonthStart&&t.dueDate<=selMonthEnd);
+  const carryTerms=allTerms.filter(t=>t.status==='Invoice Sent'&&(!t.dueDate||t.dueDate<selMonthStart));
+  const pendingOldTerms=allTerms.filter(t=>t.status==='Pending'&&(!t.dueDate||t.dueDate<selMonthStart));
+
+  const curReceived=curTerms.filter(t=>t.status==='Received').reduce((s,t)=>s+(t.amount||0),0);
+  const curInvoiced=curTerms.filter(t=>t.status==='Invoice Sent').reduce((s,t)=>s+(t.amount||0),0);
+  const curPending=curTerms.filter(t=>t.status==='Pending').reduce((s,t)=>s+(t.amount||0),0);
+  const carryTotal=carryTerms.reduce((s,t)=>s+(t.amount||0),0);
+  const pendingOldTotal=pendingOldTerms.reduce((s,t)=>s+(t.amount||0),0);
+  const estimatedReceived=curReceived+curInvoiced;
+  const nextMonthRisk=curInvoiced+curPending+carryTotal+pendingOldTotal;
+
+  function fmtD(d){if(!d)return'—';const[y,m,day]=d.split('-');const mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];return`${+day} ${mn[+m-1]} ${y}`;}
+  function overdueDays(d){if(!d)return null;const diff=Math.floor((new Date()-new Date(d))/(864e5));return diff>0?diff:null;}
+
+  function groupRows(terms, total, accentColor){
+    const groups={};
+    terms.forEach(t=>{const k=t.client||'Unknown';if(!groups[k])groups[k]={client:t.client,salesName:t.salesName,terms:[]};groups[k].terms.push(t);});
+    const list=Object.values(groups).sort((a,b)=>b.terms.reduce((s,t)=>s+(t.amount||0),0)-a.terms.reduce((s,t)=>s+(t.amount||0),0));
+    let rows='';
+    list.forEach(g=>{
+      const sub=g.terms.reduce((s,t)=>s+(t.amount||0),0);
+      rows+=`<tr style="background:#f1f5f9"><td colspan="4"><strong>${g.client}</strong> <span style="color:#64748b;font-size:10px">${g.salesName||''}</span></td>
+        <td style="text-align:right;font-weight:700;color:${accentColor};font-family:'Courier New',monospace">Rp ${fmtIDR(sub)}</td>
+        <td style="text-align:right;color:#64748b;font-size:10px">${total?Math.round(sub/total*100):0}%</td></tr>`;
+      g.terms.sort((a,b)=>(a.dueDate||'9999')>(b.dueDate||'9999')?1:-1).forEach(t=>{
+        const od=overdueDays(t.dueDate);
+        rows+=`<tr><td style="padding-left:24px;color:#94a3b8">↳</td>
+          <td>${t.label||'-'}</td>
+          <td style="font-family:'Courier New',monospace;font-size:10px">${t.dueDate?fmtD(t.dueDate):'Tidak ada due date'}</td>
+          <td style="font-family:'Courier New',monospace;font-size:10px;color:${od?'#dc2626':'#94a3b8'}">${od?od+' hari':'—'}</td>
+          <td style="text-align:right;font-family:'Courier New',monospace;font-size:11px">Rp ${fmtIDR(t.amount)}</td>
+          <td style="text-align:right;font-size:10px;color:#94a3b8">${total?Math.round((t.amount||0)/total*100):0}%</td></tr>`;
+      });
+    });
+    rows+=`<tr style="border-top:2px solid #cbd5e1;font-weight:700">
+      <td colspan="4">Total (${list.length} client)</td>
+      <td style="text-align:right;font-family:'Courier New',monospace;color:${accentColor}">Rp ${fmtIDR(total)}</td>
+      <td style="text-align:right">100%</td></tr>`;
+    return rows;
+  }
+
+  function curRows(){
+    if(!curTerms.length) return '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">Tidak ada tagihan</td></tr>';
+    const sorted=[...curTerms].sort((a,b)=>(a.dueDate||'')>(b.dueDate||'')?1:-1);
+    const PAY={Received:'#16a34a','Invoice Sent':'#d97706',Pending:'#64748b'};
+    return sorted.map(t=>`<tr>
+      <td><strong>${t.client}</strong><br><span style="color:#64748b;font-size:10px">${t.salesName||''}</span></td>
+      <td>${t.label||'-'}</td>
+      <td style="font-family:'Courier New',monospace;font-size:10px">${fmtD(t.dueDate)}</td>
+      <td style="text-align:right;font-family:'Courier New',monospace">Rp ${fmtIDR(t.amount)}</td>
+      <td><span style="color:${PAY[t.status]||'#64748b'};font-weight:600">${t.status}</span></td>
+    </tr>`).join('');
+  }
+
+  const html=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
+<title>Monthly Summary ${monthLabel}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a2e;background:#fff;padding:28px 32px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #0B1628;}
+  .logo-row{display:flex;align-items:center;gap:10px;}
+  .logo-dot{width:28px;height:28px;background:#F97316;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;}
+  .company{font-size:15px;font-weight:700;color:#0B1628;}.company em{color:#F97316;font-style:normal;}
+  .report-title{text-align:right;}.report-title h1{font-size:17px;font-weight:700;color:#0B1628;margin-bottom:3px;}
+  .report-title p{font-size:10px;color:#64748B;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+  .kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;}
+  .kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:4px;line-height:1.4;}
+  .kpi-val{font-size:15px;font-weight:700;font-family:'Courier New',monospace;line-height:1.2;}
+  .kpi-hint{font-size:9px;color:#94a3b8;margin-top:4px;line-height:1.4;}
+  .section{margin-bottom:20px;}
+  .section-title{font-size:12px;font-weight:700;color:#0B1628;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e2e8f0;}
+  table{width:100%;border-collapse:collapse;margin-bottom:4px;}
+  th{background:#0B1628;color:#F1F5F9;padding:7px 10px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+  td{padding:7px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+  tr:nth-child(even) td{background:#f8fafc;}
+  .footer{margin-top:20px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;}
+  @media print{body{padding:14px;}@page{size:A4 portrait;margin:14mm;}}
+</style></head><body>
+<div class="header">
+  <div class="logo-row"><div class="logo-dot">S</div><div><div class="company">Sprout <em>Sales</em> Tracker</div><div style="font-size:9px;color:#64748B">Internal Report</div></div></div>
+  <div class="report-title"><h1>Monthly Summary</h1><p>${monthLabel} &nbsp;·&nbsp; Dibuat: ${generatedDate}</p></div>
+</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Estimasi Received</div><div class="kpi-val" style="color:#16a34a">Rp ${fmtIDR(estimatedReceived)}</div><div class="kpi-hint">Received + Invoice Sent</div></div>
+  <div class="kpi"><div class="kpi-label">Sudah Diterima</div><div class="kpi-val" style="color:#16a34a">Rp ${fmtIDR(curReceived)}</div><div class="kpi-hint">Status Received bulan ini</div></div>
+  <div class="kpi"><div class="kpi-label">Invoice Sent</div><div class="kpi-val" style="color:#d97706">Rp ${fmtIDR(curInvoiced)}</div><div class="kpi-hint">Menunggu bayar bulan ini</div></div>
+  <div class="kpi"><div class="kpi-label">Pending Bulan Ini</div><div class="kpi-val" style="color:#64748b">Rp ${fmtIDR(curPending)}</div><div class="kpi-hint">Belum diinvoice bulan ini</div></div>
+  <div class="kpi"><div class="kpi-label">Carryover Invoice</div><div class="kpi-val" style="color:#dc2626">Rp ${fmtIDR(carryTotal)}</div><div class="kpi-hint">Invoice Sent belum bayar</div></div>
+  <div class="kpi"><div class="kpi-label">Pending Belum Invoice</div><div class="kpi-val" style="color:#d97706">Rp ${fmtIDR(pendingOldTotal)}</div><div class="kpi-hint">Termin lama belum diinvoice</div></div>
+  <div class="kpi" style="grid-column:span 2"><div class="kpi-label">Risk Bulan Depan</div><div class="kpi-val" style="color:#F97316">Rp ${fmtIDR(nextMonthRisk)}</div><div class="kpi-hint">Total jika tidak ada pembayaran sama sekali</div></div>
+</div>
+<div class="section"><div class="section-title">Tagihan ${monthLabel}</div>
+  <table><thead><tr><th>Client</th><th>Termin</th><th>Due Date</th><th style="text-align:right">Nominal</th><th>Status</th></tr></thead>
+  <tbody>${curRows()}</tbody></table></div>
+<div class="section"><div class="section-title">🔴 Carryover — Invoice Belum Dibayar</div>
+  ${carryTerms.length?`<table><thead><tr><th>Client / Termin</th><th>Termin</th><th>Due Date</th><th>Hari Terlambat</th><th style="text-align:right">Nominal</th><th style="text-align:right">%</th></tr></thead><tbody>${groupRows(carryTerms,carryTotal,'#dc2626')}</tbody></table>`:'<p style="color:#94a3b8;padding:8px 0">Tidak ada carryover.</p>'}
+</div>
+<div class="section"><div class="section-title">⏳ Pending Belum Diinvoice</div>
+  ${pendingOldTerms.length?`<table><thead><tr><th>Client / Termin</th><th>Termin</th><th>Due Date</th><th>Hari Terlambat</th><th style="text-align:right">Nominal</th><th style="text-align:right">%</th></tr></thead><tbody>${groupRows(pendingOldTerms,pendingOldTotal,'#d97706')}</tbody></table>`:'<p style="color:#94a3b8;padding:8px 0">Tidak ada pending lama.</p>'}
+</div>
+<div class="footer"><span>Sprout Sales Tracker &nbsp;·&nbsp; Confidential</span><span>Dicetak: ${generatedDate}</span></div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+
+  const win=window.open('','_blank','width=900,height:1100');
+  win.document.write(html);
+  win.document.close();
+  toast('PDF Monthly Summary siap di-print ✓','success');
+}
+
+// ===== MEMBERS CRUD =====
+function renderMembers(){
+  const members=DB.get('members');
+  const memberPws=getMemberPasswords();
+  const el=document.getElementById('members-list');
+
+  if(!members.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">👥</div><p>Belum ada member. Tambah anggota tim di atas.</p></div>`;
+    return;
+  }
+
+  const roleLabel={sales:'💼 Sales',head:'👁 Head of Sales',finance:'💰 Finance'};
+  const roleBadgeStyle={
+    sales:'background:rgba(249,115,22,.12);color:#FDBA74;border:1px solid rgba(249,115,22,.3)',
+    head:'background:rgba(59,130,246,.12);color:#93C5FD;border:1px solid rgba(59,130,246,.3)',
+    finance:'background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.3)'
+  };
+  el.innerHTML=members.map(m=>{
+    const acts=DB.get('activities').filter(a=>(a.salesName||'').toLowerCase()===m.name.toLowerCase());
+    return `<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--orange-dim);border:1px solid rgba(249,115,22,.3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--orange);flex-shrink:0">${m.name.charAt(0).toUpperCase()}</div>
+      <div style="flex:1;min-width:160px">
+        <div style="font-weight:600;font-size:14px">${m.name}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${m.note||''}</div>
+      </div>
+      <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${roleBadgeStyle[m.role]||''}">${roleLabel[m.role]||m.role}</span>
+      <div style="font-size:12px;color:var(--text2);min-width:80px">${acts.length} aktivitas</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="promptResetPassword('${m.id}','${m.name}')">🔑 Reset PW</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMember('${m.id}','${m.name}')">🗑 Hapus</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addMember(){
+  const name=document.getElementById('m-name').value.trim();
+  const role=document.getElementById('m-role').value;
+  const pass=document.getElementById('m-pass').value.trim();
+  const note=document.getElementById('m-note').value.trim();
+  const err=document.getElementById('m-err');
+  if(!name){err.textContent='Masukkan nama member';return;}
+  if(!pass){err.textContent='Masukkan password untuk member ini';return;}
+  if(DB.get('members').find(m=>m.name.toLowerCase()===name.toLowerCase())){
+    err.textContent='Nama sudah terdaftar';return;
+  }
+  DB.createMember({name,role,note,password:pass}).then(()=>{
+    ['m-name','m-pass','m-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('m-role').value='sales';
+    err.textContent='';
+    refreshSalesDropdowns();
+    renderMembers();
+    toast(`Member "${name}" berhasil ditambahkan ✓`);
+  }).catch(e=>{err.textContent='Gagal: '+e.message;});
+}
+
+function deleteMember(id,name){
+  if(!confirm(`Hapus member "${name}"?\n\nData aktivitas mereka tidak akan ikut terhapus.`)) return;
+  DB.deleteMember(id).then(()=>{
+    refreshSalesDropdowns(); renderMembers(); toast(`Member "${name}" dihapus`);
+  }).catch(e=>toast('Gagal hapus: '+e.message,'error'));
+}
+
+function promptResetPassword(id,name){
+  const newPw=prompt(`Reset password untuk "${name}":\nMasukkan password baru:`);
+  if(!newPw||!newPw.trim()) return;
+  const m=DB.get('members').find(m=>m.id===id); if(!m) return;
+  DB.updateMember(id,{...m,password:newPw.trim()}).then(()=>{
+    renderMembers(); toast(`Password "${name}" berhasil direset ✓`);
+  }).catch(e=>toast('Gagal: '+e.message,'error'));
+}
+
+// ===== SETTINGS =====
+function changePassword(){
+  // admin / head / sales(generic) passwords are stored as Cloudflare
+  // Worker secrets — they cannot be changed from the browser.
+  // To change them: Cloudflare dashboard → Worker → Settings →
+  // Variables and Secrets → edit ADMIN_PASSWORD / HEAD_PASSWORD /
+  // SALES_PASSWORD → redeploy.
+  toast('Password admin/head/sales dikelola via Cloudflare Worker secrets. Untuk per-person sales, ganti di halaman Members.','error');
+}
+
+function exportAll(){
+  // Export cache snapshot as JSON backup
+  const data={activities:DB.get('activities'),projects:DB.get('projects'),members:DB.get('members'),exportedAt:new Date().toISOString()};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download=`sprout-backup-${tod()}.json`; a.click();
+  toast('Backup berhasil didownload ✓');
+}
+
+function doImport(e){
+  // Import is disabled in Airtable mode — data lives in Airtable
+  toast('Import tidak tersedia di mode Airtable. Edit data langsung di airtable.com','error');
+  e.target.value='';
+}
+
+function clearAll(){
+  toast('Hapus semua data tidak tersedia di mode Airtable. Hapus langsung dari airtable.com','error');
+}
+
+function exportCSV(){
+  const acts=myActs();
+  if(!acts.length){toast('Tidak ada data','error');return;}
+  const h=['Tanggal','Client','Sales','Tipe','Potential','MoM','Next Step','Tgl FU','Status FU'];
+  const rows=acts.map(a=>[a.tanggal||'',a.client||'',a.salesName||'',a.actType||'',a.potential||'',
+    `"${(a.mom||'').replace(/"/g,'""')}"`,`"${(a.nextStep||'').replace(/"/g,'""')}"`,a.tanggalFU||'',a.statusFU||'']);
+  const csv=[h.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`sprout-sales-${tod()}.csv`; a.click();
+  toast('CSV berhasil diexport ✓');
+}
+
+// ===== BOOT — load all data from Airtable on page load =====
+window.addEventListener('DOMContentLoaded', ()=>{
+  // PIN box behaviour
+  const boxes=[...document.querySelectorAll('.pin-box')];
+  boxes.forEach((box,i)=>{
+    box.addEventListener('input',()=>{
+      box.value=box.value.replace(/[^0-9]/g,'').slice(-1);
+      box.classList.toggle('filled',!!box.value);
+      if(box.value && i<boxes.length-1) boxes[i+1].focus();
+      if(boxes.every(b=>b.value)) doLogin();
+    });
+    box.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!box.value&&i>0){ boxes[i-1].value=''; boxes[i-1].classList.remove('filled'); boxes[i-1].focus(); }
+      if(e.key==='Enter') doLogin();
+    });
+    box.addEventListener('focus',()=>box.select());
+    box.addEventListener('paste',e=>{
+      e.preventDefault();
+      const digits=(e.clipboardData.getData('text').replace(/[^0-9]/g,'')).slice(0,6);
+      digits.split('').forEach((d,j)=>{ if(boxes[j]){boxes[j].value=d;boxes[j].classList.add('filled');} });
+      boxes[Math.min(digits.length,5)].focus();
+      if(digits.length===6) doLogin();
+    });
+  });
+
+  // Pre-load members so login works immediately
+  if(WORKER_URL && !/YOUR-WORKER-SUBDOMAIN/.test(WORKER_URL)){
+    showGlobalLoader(true);
+    atFetchAll(TABLES.members).then(recs=>{
+      CACHE.members=recs.map(memberFromRecord);
+    }).catch(()=>{}).finally(()=>showGlobalLoader(false));
+  }
+});
+</script>
+</body>
+</html>

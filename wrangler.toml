@@ -1,0 +1,12 @@
+name            = "sprout-proxy1"
+main            = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Secrets are NOT stored here — set them in the Cloudflare dashboard or via:
+#   wrangler secret put AIRTABLE_TOKEN
+#   wrangler secret put AIRTABLE_BASE_ID
+#   wrangler secret put ADMIN_PASSWORD
+#   wrangler secret put HEAD_PASSWORD
+#   wrangler secret put SALES_PASSWORD
+#   wrangler secret put FINANCE_PASSWORD
+#   wrangler secret put ALLOWED_ORIGIN
