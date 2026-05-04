@@ -162,8 +162,7 @@
   ::-webkit-scrollbar{width:5px;}
   ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
   .pin-row{display:flex;gap:10px;justify-content:center;margin-top:4px;}
-  .pin-box{width:46px!important;height:54px;text-align:center;font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;border-radius:10px;border:2px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text);padding:0;transition:border .2s;-moz-appearance:textfield;}
-  .pin-box::-webkit-outer-spin-button,.pin-box::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;}
+  .pin-box{width:46px!important;height:54px;text-align:center;font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;border-radius:10px;border:2px solid var(--border2);background:rgba(255,255,255,0.06);color:var(--text);padding:0;transition:border .2s;caret-color:transparent;user-select:none;}
   .pin-box:focus{border-color:var(--orange);outline:none;background:rgba(249,115,22,0.06);}
   .pin-box.filled{border-color:var(--orange2);}
 </style>
@@ -479,12 +478,12 @@ function showToastGlobal(msg,type){ showToast(msg,type); }
     <div class="form-group">
       <label style="text-align:center;display:block">PIN</label>
       <div class="pin-row" id="pin-row">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
-        <input class="pin-box" type="number" min="0" max="9" inputmode="numeric">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
+        <input class="pin-box" type="text" inputmode="numeric" autocomplete="off">
       </div>
     </div>
     <div id="login-error" class="error-msg"></div>
@@ -964,7 +963,7 @@ function doLogout(){
   const _fps=document.getElementById('fp-sales');if(_fps){_fps.style.display='none';_fps.value='';}
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').style.display='none';
-  document.querySelectorAll('.pin-box').forEach(b=>{b.value='';b.classList.remove('filled');});
+  document.querySelectorAll('.pin-box').forEach(b=>{clearTimeout(b._mt);b.value='';b.dataset.v='';b.classList.remove('filled');});
   document.querySelectorAll('.pin-box')[0]?.focus();
   document.getElementById('login-error').textContent='';
 }
@@ -1056,46 +1055,56 @@ function refreshSalesDropdowns(){
 function getMemberPasswords(){ return {}; } // passwords now in Members table
 function setMemberPasswords(obj){} // no-op, handled via DB.updateMember
 
+let _loginInFlight=false;
 async function doLogin(){
-  const role=document.getElementById('login-role').value;
-  const name=document.getElementById('login-name').value.trim();
-  const pass=[...document.querySelectorAll('.pin-box')].map(b=>b.value).join('');
+  if(_loginInFlight) return;
+  _loginInFlight=true;
+  const boxes=[...document.querySelectorAll('.pin-box')];
+  boxes.forEach(b=>b.disabled=true);
   const err=document.getElementById('login-error');
   err.textContent='';
-
-  if(pass.length<6){err.textContent='Masukkan 6 digit PIN';return;}
-
-  if(role==='admin'){
-    const ok=await verifyPasswordViaWorker('admin',pass);
-    if(!ok){err.textContent='Password salah';return;}
-    CU={role:'admin',name:'Admin'};
-  } else if(role==='head'){
-    const ok=await verifyPasswordViaWorker('head',pass);
-    if(!ok){err.textContent='Password salah';return;}
-    CU={role:'head',name:'Head of Sales'};
-  } else if(role==='finance'){
-    if(!name){err.textContent='Masukkan nama kamu';return;}
-    const ok=await verifyPasswordViaWorker('finance',pass);
-    if(!ok){err.textContent='Password salah';return;}
-    CU={role:'finance',name};
-  } else {
-    if(!name){err.textContent='Masukkan nama kamu';return;}
-    const ok=await verifyPasswordViaWorker('sales',pass);
-    if(!ok){err.textContent='Password salah';return;}
-    CU={role:'sales',name};
-  }
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  setupUI();
-  // Load all data from Airtable, then render starting page
-  DB.loadAll().then(()=>{
-    refreshSalesDropdowns();
-    if(CU.role==='sales'){
-      const sel=document.getElementById('f-salesname');
-      if(sel) sel.value=CU.name;
+  try{
+    const role=document.getElementById('login-role').value;
+    const name=document.getElementById('login-name').value.trim();
+    const pass=boxes.map(b=>b.dataset.v||'').join('');
+    if(pass.length<6){err.textContent='Masukkan 6 digit PIN';return;}
+    if(role==='admin'){
+      const ok=await verifyPasswordViaWorker('admin',pass);
+      if(!ok){err.textContent='Password salah';return;}
+      CU={role:'admin',name:'Admin'};
+    } else if(role==='head'){
+      const ok=await verifyPasswordViaWorker('head',pass);
+      if(!ok){err.textContent='Password salah';return;}
+      CU={role:'head',name:'Head of Sales'};
+    } else if(role==='finance'){
+      if(!name){err.textContent='Masukkan nama kamu';return;}
+      const ok=await verifyPasswordViaWorker('finance',pass);
+      if(!ok){err.textContent='Password salah';return;}
+      CU={role:'finance',name};
+    } else {
+      if(!name){err.textContent='Masukkan nama kamu';return;}
+      const ok=await verifyPasswordViaWorker('sales',pass);
+      if(!ok){err.textContent='Password salah';return;}
+      CU={role:'sales',name};
     }
-    showPage(CU.role==='finance'?'projects':'dashboard');
-  });
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    setupUI();
+    DB.loadAll().then(()=>{
+      refreshSalesDropdowns();
+      if(CU.role==='sales'){
+        const sel=document.getElementById('f-salesname');
+        if(sel) sel.value=CU.name;
+      }
+      showPage(CU.role==='finance'?'projects':'dashboard');
+    });
+  } finally {
+    _loginInFlight=false;
+    if(document.getElementById('login-screen').style.display!=='none'){
+      boxes.forEach(b=>{clearTimeout(b._mt);b.disabled=false;b.value='';b.dataset.v='';b.classList.remove('filled');});
+      boxes[0].focus();
+    }
+  }
 }
 function showPage(pg){
   if((pg==='settings'||pg==='members')&&CU.role!=='admin') return;
@@ -2692,24 +2701,47 @@ function exportCSV(){
 
 // ===== BOOT — load all data from Airtable on page load =====
 window.addEventListener('DOMContentLoaded', ()=>{
-  // PIN box behaviour
+  // PIN box behaviour — show digit briefly then mask with •
   const boxes=[...document.querySelectorAll('.pin-box')];
+  function fillBox(box,digit){
+    clearTimeout(box._mt);
+    box.dataset.v=digit;
+    box.value=digit;
+    box.classList.add('filled');
+    box._mt=setTimeout(()=>{ box.value='•'; },400);
+  }
+  function clearBox(box){
+    clearTimeout(box._mt);
+    box.dataset.v='';
+    box.value='';
+    box.classList.remove('filled');
+  }
   boxes.forEach((box,i)=>{
-    box.addEventListener('input',()=>{
-      box.value=box.value.replace(/[^0-9]/g,'').slice(-1);
-      box.classList.toggle('filled',!!box.value);
-      if(box.value && i<boxes.length-1) boxes[i+1].focus();
-      if(boxes.every(b=>b.value)) doLogin();
-    });
+    box.dataset.v='';
+    // keydown: intercept digit before it renders (no flash on desktop)
     box.addEventListener('keydown',e=>{
-      if(e.key==='Backspace'&&!box.value&&i>0){ boxes[i-1].value=''; boxes[i-1].classList.remove('filled'); boxes[i-1].focus(); }
-      if(e.key==='Enter') doLogin();
+      if(/^[0-9]$/.test(e.key)){
+        e.preventDefault();
+        fillBox(box,e.key);
+        if(i<boxes.length-1) boxes[i+1].focus();
+        if(boxes.every(b=>b.dataset.v)) doLogin();
+      } else if(e.key==='Backspace'){
+        e.preventDefault();
+        if(box.dataset.v){ clearBox(box); }
+        else if(i>0){ clearBox(boxes[i-1]); boxes[i-1].focus(); }
+      } else if(e.key==='Enter'){ doLogin(); }
+    });
+    // input: fallback for mobile virtual keyboards that skip keydown
+    box.addEventListener('input',()=>{
+      const digit=box.value.replace(/[^0-9]/g,'').slice(-1);
+      if(digit){ fillBox(box,digit); if(i<boxes.length-1) boxes[i+1].focus(); if(boxes.every(b=>b.dataset.v)) doLogin(); }
+      else { box.value=box.dataset.v?'•':''; }
     });
     box.addEventListener('focus',()=>box.select());
     box.addEventListener('paste',e=>{
       e.preventDefault();
       const digits=(e.clipboardData.getData('text').replace(/[^0-9]/g,'')).slice(0,6);
-      digits.split('').forEach((d,j)=>{ if(boxes[j]){boxes[j].value=d;boxes[j].classList.add('filled');} });
+      digits.split('').forEach((d,j)=>{ if(boxes[j]) fillBox(boxes[j],d); });
       boxes[Math.min(digits.length,5)].focus();
       if(digits.length===6) doLogin();
     });
