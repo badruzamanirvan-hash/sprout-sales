@@ -183,15 +183,16 @@ const WORKER_URL = "https://sprout-proxy1.badruzaman-irvan.workers.dev";
 
 // Airtable table names — must match exactly what you create in Airtable
 const TABLES = {
-  activities : "Sales Activity",
-  projects   : "Project Tracking",
-  members    : "Members"
+  activities   : "Sales Activity",
+  projects     : "Project Tracking",
+  members      : "Members",
+  opportunities: "Opportunities"
 };
 
 // ============================================================
 //  IN-MEMORY CACHE  (keeps UI sync, Airtable is sources of truth)
 // ============================================================
-const CACHE = { activities:[], projects:[], members:[] };
+const CACHE = { activities:[], projects:[], members:[], opportunities:[] };
 
 // ============================================================
 //  AIRTABLE API HELPERS
@@ -336,6 +337,59 @@ function memberFromRecord(r){
   };
 }
 
+function oppToFields(o){
+  const f = {
+    'Client'              : o.client||'',
+    'Project Name'        : o.projectName||'',
+    'Sales Name'          : o.salesName||'',
+    'Stage'               : o.stage||'Identified',
+    'Win Probability'     : o.winProb||0,
+    'Deal Value (IDR)'    : o.dealValue||0,
+    'Expected Close Date' : o.closeDate||null,
+    'Target Project Start': o.startDate||null,
+    'Service Type'        : o.serviceType||[],
+    'Engagement Model'    : o.engagementModel||'',
+    'Deal Source'         : o.dealSource||'',
+    'Budget Confirmed'    : o.budgetConfirmed||'Unknown',
+    'Last Contact Date'   : o.lastContact||null,
+    'Next Follow-up Date' : o.nextFU||null,
+    'Follow-up Status'    : o.fuStatus||'On Track',
+    'Stall Reason'        : o.stallReason||'',
+    'Decision Maker'      : o.decisionMaker||'',
+    'Next Action'         : o.nextAction||'',
+    'Notes'               : o.notes||''
+  };
+  Object.keys(f).forEach(k=>{ if(f[k]===null||f[k]===''||(Array.isArray(f[k])&&!f[k].length)) delete f[k]; });
+  return f;
+}
+function oppFromRecord(r){
+  const f=r.fields;
+  return {
+    _id            : r.id,
+    id             : r.id,
+    client         : f['Client']||'',
+    projectName    : f['Project Name']||'',
+    salesName      : f['Sales Name']||'',
+    stage          : f['Stage']||'Identified',
+    winProb        : f['Win Probability']||0,
+    dealValue      : f['Deal Value (IDR)']||0,
+    closeDate      : f['Expected Close Date']||null,
+    startDate      : f['Target Project Start']||null,
+    serviceType    : f['Service Type']||[],
+    engagementModel: f['Engagement Model']||'',
+    dealSource     : f['Deal Source']||'',
+    budgetConfirmed: f['Budget Confirmed']||'Unknown',
+    lastContact    : f['Last Contact Date']||null,
+    nextFU         : f['Next Follow-up Date']||null,
+    fuStatus       : f['Follow-up Status']||'On Track',
+    stallReason    : f['Stall Reason']||'',
+    decisionMaker  : f['Decision Maker']||'',
+    nextAction     : f['Next Action']||'',
+    notes          : f['Notes']||'',
+    createdAt      : r.createdTime
+  };
+}
+
 // ============================================================
 //  HIGH-LEVEL DATA FUNCTIONS  (used by UI code)
 // ============================================================
@@ -350,14 +404,16 @@ const DB = {
   async loadAll(){
     showGlobalLoader(true);
     try {
-      const [actRecs, projRecs, memRecs] = await Promise.all([
+      const [actRecs, projRecs, memRecs, oppRecs] = await Promise.all([
         atFetchAll(TABLES.activities),
         atFetchAll(TABLES.projects),
-        atFetchAll(TABLES.members)
+        atFetchAll(TABLES.members),
+        atFetchAll(TABLES.opportunities)
       ]);
-      CACHE.activities = actRecs.map(actFromRecord);
-      CACHE.projects   = projRecs.map(projFromRecord);
-      CACHE.members    = memRecs.map(memberFromRecord);
+      CACHE.activities   = actRecs.map(actFromRecord);
+      CACHE.projects     = projRecs.map(projFromRecord);
+      CACHE.members      = memRecs.map(memberFromRecord);
+      CACHE.opportunities= oppRecs.map(oppFromRecord);
     } catch(e){
       console.error(e);
       showToastGlobal('⚠️ Gagal load data dari Airtable. Cek konfigurasi token & Base ID.','error');
@@ -420,6 +476,25 @@ const DB = {
   async deleteMember(id){
     await atDelete(TABLES.members, id);
     CACHE.members = CACHE.members.filter(m=>m.id!==id);
+  },
+
+  // ---- OPPORTUNITIES ----
+  async createOpp(obj){
+    const rec = await atCreate(TABLES.opportunities, oppToFields(obj));
+    const newObj = oppFromRecord(rec);
+    CACHE.opportunities.unshift(newObj);
+    return newObj;
+  },
+  async updateOpp(id, obj){
+    const rec = await atUpdate(TABLES.opportunities, id, oppToFields(obj));
+    const newObj = oppFromRecord(rec);
+    const i = CACHE.opportunities.findIndex(o=>o.id===id);
+    if(i>-1) CACHE.opportunities[i]=newObj;
+    return newObj;
+  },
+  async deleteOpp(id){
+    await atDelete(TABLES.opportunities, id);
+    CACHE.opportunities = CACHE.opportunities.filter(o=>o.id!==id);
   }
 };
 
@@ -503,6 +578,7 @@ function showToastGlobal(msg,type){ showToast(msg,type); }
       <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
       <div class="nav-item" id="nav-activity" onclick="showPage('activity')"><span class="nav-icon">📋</span>Sales Activity</div>
       <div class="nav-item" id="nav-add-activity" onclick="showPage('add-activity')"><span class="nav-icon">➕</span>Tambah Aktivitas</div>
+      <div class="nav-item" id="nav-pipeline" onclick="showPage('pipeline')"><span class="nav-icon">🎯</span>Pipeline</div>
       <div class="nav-item" id="nav-projects" onclick="showPage('projects')"><span class="nav-icon">🚀</span>Project Tracking</div>
       <div class="nav-item" id="nav-monthly" onclick="showPage('monthly')" style="display:none"><span class="nav-icon">📅</span>Monthly Summaries</div>
       <div class="nav-item" id="nav-add-project" onclick="showPage('add-project')" style="display:none"><span class="nav-icon">📁</span>Tambah Project</div>
@@ -657,6 +733,114 @@ function showToastGlobal(msg,type){ showToast(msg,type); }
       <!-- Project Cards -->
       <div class="section-title">Detail Per Project</div>
       <div id="proj-body"></div>
+    </div>
+
+    <!-- PIPELINE / OPPORTUNITIES -->
+    <div class="page" id="page-pipeline">
+      <div class="page-header">
+        <div class="page-title">Pipeline</div>
+        <div class="page-sub">Deals aktif yang sedang dikejar — follow-up & conversion tracker</div>
+      </div>
+
+      <!-- Pipeline KPIs -->
+      <div id="opp-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px"></div>
+
+      <div class="actions-bar">
+        <div class="filter-bar">
+          <input type="text" id="fo-search" placeholder="Cari client / project..." oninput="renderPipeline()">
+          <select id="fo-stage" onchange="renderPipeline()">
+            <option value="">Semua Stage</option>
+            <option>Identified</option><option>Contacted</option><option>Discovery</option>
+            <option>Proposal Sent</option><option>Negotiation</option><option>Contract Review</option>
+            <option>Closed Won</option><option>Closed Lost</option><option>On Hold</option>
+          </select>
+          <select id="fo-fu" onchange="renderPipeline()">
+            <option value="">Semua FU Status</option>
+            <option>On Track</option><option>Overdue</option><option>Waiting on Client</option><option>Blocked</option>
+          </select>
+          <select id="fo-sales" onchange="renderPipeline()" style="display:none"><option value="">Semua Sales</option></select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showPage('add-opp')">+ Tambah Deal</button>
+      </div>
+
+      <div class="table-wrap"><div id="opp-table"></div></div>
+    </div>
+
+    <!-- ADD / EDIT OPPORTUNITY -->
+    <div class="page" id="page-add-opp">
+      <div class="page-header"><div class="page-title" id="form-opp-title">Tambah Deal</div></div>
+      <div class="panel">
+        <input type="hidden" id="edit-opp-id">
+        <div class="form-grid">
+          <div class="form-group"><label>Client *</label><input type="text" id="fo-client" placeholder="Nama perusahaan..."></div>
+          <div class="form-group"><label>Project / Deal Name *</label><input type="text" id="fo-project-name" placeholder="Nama project atau inisiatif..."></div>
+          <div class="form-group"><label>Sales</label><input type="text" id="fo-sales-name" placeholder="Nama sales..."></div>
+          <div class="form-group">
+            <label>Stage</label>
+            <select id="fo-stage-form">
+              <option>Identified</option><option>Contacted</option><option>Discovery</option>
+              <option>Proposal Sent</option><option>Negotiation</option><option>Contract Review</option>
+              <option>Closed Won</option><option>Closed Lost</option><option>On Hold</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Win Probability (%)</label><input type="number" id="fo-win-prob" min="0" max="100" placeholder="0–100"></div>
+          <div class="form-group"><label>Deal Value (IDR)</label><input type="number" id="fo-deal-value" placeholder="Estimasi nilai deal..."></div>
+          <div class="form-group"><label>Expected Close Date</label><input type="date" id="fo-close-date"></div>
+          <div class="form-group"><label>Target Project Start</label><input type="date" id="fo-start-date"></div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <select id="fo-service-type" multiple style="height:96px">
+              <option>Product Build</option><option>ERP</option><option>AI & Automation</option>
+              <option>Integration</option><option>Workshop</option><option>Consulting</option>
+            </select>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Tahan Ctrl/Cmd untuk pilih lebih dari satu</div>
+          </div>
+          <div class="form-group">
+            <label>Engagement Model</label>
+            <select id="fo-engagement">
+              <option value="">— Pilih —</option>
+              <option>Fixed Price</option><option>Retainer</option><option>T&M</option><option>Discovery First</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Deal Source</label>
+            <select id="fo-source">
+              <option value="">— Pilih —</option>
+              <option>Referral</option><option>Inbound</option><option>Outbound</option><option>Event</option><option>Partner</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Budget Confirmed</label>
+            <select id="fo-budget">
+              <option>Unknown</option><option>Estimate Only</option><option>Yes</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Decision Maker</label><input type="text" id="fo-dm" placeholder="Nama + jabatan..."></div>
+          <div class="form-group"><label>Last Contact Date</label><input type="date" id="fo-last-contact"></div>
+          <div class="form-group"><label>Next Follow-up Date</label><input type="date" id="fo-next-fu"></div>
+          <div class="form-group">
+            <label>Follow-up Status</label>
+            <select id="fo-fu-status">
+              <option>On Track</option><option>Overdue</option><option>Waiting on Client</option><option>Blocked</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Stall Reason</label>
+            <select id="fo-stall">
+              <option value="">— Tidak ada —</option>
+              <option>Pricing</option><option>Internal Approval</option><option>Competing Priority</option>
+              <option>Ghosted</option><option>Vendor Lock</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group full"><label>Next Action</label><textarea id="fo-next-action" placeholder="Apa yang harus dilakukan selanjutnya?"></textarea></div>
+          <div class="form-group full"><label>Notes</label><textarea id="fo-notes" placeholder="Context tambahan, history, blockers..."></textarea></div>
+        </div>
+        <div id="opp-err" class="error-msg"></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOpp()">💾 Simpan</button>
+          <button class="btn btn-ghost" onclick="showPage('pipeline')">Batal</button>
+        </div>
+      </div>
     </div>
 
     <!-- MONTHLY SUMMARIES (Admin only) -->
@@ -1071,7 +1255,7 @@ async function doLogin(){
     if(role==='admin'){
       const ok=await verifyPasswordViaWorker('admin',pass);
       if(!ok){err.textContent='Password salah';return;}
-      CU={role:'admin',name:'Admin'};
+      CU={role:'admin',name:'Irfan'};
     } else if(role==='head'){
       const ok=await verifyPasswordViaWorker('head',pass);
       if(!ok){err.textContent='Password salah';return;}
@@ -1117,9 +1301,11 @@ function showPage(pg){
   document.getElementById('sidebar').classList.remove('open');
   if(pg==='add-activity') resetActForm();
   if(pg==='add-project')  resetProjForm();
+  if(pg==='add-opp')      resetOppForm();
   if(pg==='dashboard')    renderDash();
   if(pg==='activity')     renderActivityTable();
   if(pg==='projects')     renderProjects();
+  if(pg==='pipeline')     renderPipeline();
   if(pg==='members')      renderMembers();
   if(pg==='monthly')      renderMonthlySummaries();
 }
@@ -1145,6 +1331,10 @@ function myActs(){
 function myProjs(){
   const all=DB.get('projects');
   return CU.role==='sales'?all.filter(p=>(p.salesName||'').toLowerCase()===CU.name.toLowerCase()):all;
+}
+function myOpps(){
+  const all=DB.get('opportunities');
+  return CU.role==='sales'?all.filter(o=>(o.salesName||'').toLowerCase()===CU.name.toLowerCase()):all;
 }
 
 // ===== DASHBOARD =====
@@ -2755,6 +2945,223 @@ window.addEventListener('DOMContentLoaded', ()=>{
     }).catch(()=>{}).finally(()=>showGlobalLoader(false));
   }
 });
+
+// ===== PIPELINE / OPPORTUNITIES =====
+const STAGE_COLORS = {
+  'Identified'     :'color:#94A3B8;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25)',
+  'Contacted'      :'color:#60A5FA;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.25)',
+  'Discovery'      :'color:#22D3EE;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.25)',
+  'Proposal Sent'  :'color:#FCD34D;background:rgba(252,211,77,.12);border:1px solid rgba(252,211,77,.25)',
+  'Negotiation'    :'color:#FB923C;background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.25)',
+  'Contract Review':'color:#C084FC;background:rgba(192,132,252,.12);border:1px solid rgba(192,132,252,.25)',
+  'Closed Won'     :'color:#4ADE80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25)',
+  'Closed Lost'    :'color:#F87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25)',
+  'On Hold'        :'color:#94A3B8;background:rgba(100,116,139,.12);border:1px solid rgba(100,116,139,.25)'
+};
+const FU_COLORS = {
+  'On Track'         :'color:#4ADE80;background:rgba(74,222,128,.1)',
+  'Overdue'          :'color:#F87171;background:rgba(248,113,113,.1)',
+  'Waiting on Client':'color:#FCD34D;background:rgba(252,211,77,.1)',
+  'Blocked'          :'color:#FB923C;background:rgba(251,146,60,.1)'
+};
+
+function renderPipeline(){
+  let opps = myOpps();
+  const q  = (document.getElementById('fo-search')?.value||'').toLowerCase();
+  const st = document.getElementById('fo-stage')?.value||'';
+  const fu = document.getElementById('fo-fu')?.value||'';
+  const sn = document.getElementById('fo-sales')?.value||'';
+  if(q)  opps=opps.filter(o=>(o.client+o.projectName).toLowerCase().includes(q));
+  if(st) opps=opps.filter(o=>o.stage===st);
+  if(fu) opps=opps.filter(o=>o.fuStatus===fu);
+  if(sn) opps=opps.filter(o=>o.salesName===sn);
+
+  const active = opps.filter(o=>o.stage!=='Closed Won'&&o.stage!=='Closed Lost');
+  const totalPipe  = active.reduce((s,o)=>s+(o.dealValue||0),0);
+  const weighted   = active.reduce((s,o)=>s+((o.dealValue||0)*(o.winProb||0)/100),0);
+  const won        = opps.filter(o=>o.stage==='Closed Won').reduce((s,o)=>s+(o.dealValue||0),0);
+  const t = tod();
+  const overdue    = opps.filter(o=>o.nextFU&&o.nextFU<t&&o.stage!=='Closed Won'&&o.stage!=='Closed Lost').length;
+
+  document.getElementById('opp-kpis').innerHTML=`
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius2);padding:16px 20px">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Pipeline Value</div>
+      <div style="font-size:20px;font-weight:700;color:var(--orange);font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(totalPipe)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">${active.length} deals aktif</div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius2);padding:16px 20px">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Weighted Value</div>
+      <div style="font-size:20px;font-weight:700;color:var(--blue);font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(weighted)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">Prob-adjusted forecast</div>
+    </div>
+    <div style="background:var(--card2);border:1px solid ${overdue>0?'rgba(248,113,113,.35)':'var(--border2)'};border-radius:var(--radius2);padding:16px 20px">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">FU Overdue</div>
+      <div style="font-size:20px;font-weight:700;color:${overdue>0?'var(--red)':'var(--green)'};font-family:'JetBrains Mono',monospace">${overdue}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">Melewati tanggal FU</div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius2);padding:16px 20px">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Closed Won</div>
+      <div style="font-size:20px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace">Rp ${fmtIDR(won)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">${opps.filter(o=>o.stage==='Closed Won').length} deals won</div>
+    </div>`;
+
+  const sorted = [...opps].sort((a,b)=>{
+    const pri={'Overdue':0,'Blocked':1,'On Track':2,'Waiting on Client':3};
+    return (pri[a.fuStatus]??9)-(pri[b.fuStatus]??9);
+  });
+
+  const canEdit = CU.role!=='finance';
+  const el = document.getElementById('opp-table');
+  if(!sorted.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">🎯</div><p>Belum ada deal di pipeline. Klik "+ Tambah Deal" untuk mulai.</p></div>`;
+    return;
+  }
+
+  el.innerHTML=`<table>
+    <thead><tr>
+      <th>Client / Deal</th>
+      <th>Stage</th>
+      <th>Deal Value</th>
+      <th>Win %</th>
+      <th>Weighted</th>
+      <th>Sales</th>
+      <th>Last Contact</th>
+      <th>Next FU</th>
+      <th>FU Status</th>
+      <th>Next Action</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+    ${sorted.map(o=>{
+      const sc = STAGE_COLORS[o.stage]||'';
+      const fc = FU_COLORS[o.fuStatus]||'';
+      const isOverdue = o.nextFU&&o.nextFU<t&&o.stage!=='Closed Won'&&o.stage!=='Closed Lost';
+      const weighted_val = (o.dealValue||0)*(o.winProb||0)/100;
+      return `<tr style="${isOverdue?'background:rgba(248,113,113,.04)':''}">
+        <td>
+          <div style="font-weight:600;color:var(--text)">${o.client||'—'}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${o.projectName||''}</div>
+        </td>
+        <td><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;${sc}">${o.stage}</span></td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text)">${o.dealValue?'Rp '+fmtIDR(o.dealValue):'—'}</td>
+        <td style="font-weight:600;color:${(o.winProb||0)>=60?'var(--green)':(o.winProb||0)>=30?'var(--yellow)':'var(--text2)'}">${o.winProb||0}%</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">${weighted_val?'Rp '+fmtIDR(weighted_val):'—'}</td>
+        <td style="font-size:12px;color:var(--text2)">${o.salesName||'—'}</td>
+        <td style="font-size:12px;color:var(--text3)">${o.lastContact?fmtDate(o.lastContact):'—'}</td>
+        <td style="font-size:12px;color:${isOverdue?'var(--red)':'var(--text)'};font-weight:${isOverdue?'600':'400'}">${o.nextFU?fmtDate(o.nextFU):'—'}${isOverdue?' 🔴':''}</td>
+        <td><span style="display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;${fc}">${o.fuStatus||'—'}</span></td>
+        <td style="font-size:11px;color:var(--text2);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.nextAction||'—'}</td>
+        <td style="white-space:nowrap">
+          ${canEdit?`<button class="btn btn-ghost btn-sm" onclick="editOpp('${o.id}')">Edit</button>`:''}
+          ${CU.role==='admin'?`<button class="btn btn-danger btn-sm" onclick="delOpp('${o.id}')">Del</button>`:''}
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+
+  // Populate sales dropdown for non-admin
+  const salesSel = document.getElementById('fo-sales');
+  if(salesSel && (CU.role==='admin'||CU.role==='head')){
+    salesSel.style.display='';
+    const names=[...new Set(myOpps().map(o=>o.salesName).filter(Boolean))];
+    const cur=salesSel.value;
+    salesSel.innerHTML='<option value="">Semua Sales</option>'+names.map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join('');
+  }
+}
+
+function resetOppForm(){
+  document.getElementById('edit-opp-id').value='';
+  document.getElementById('form-opp-title').textContent='Tambah Deal';
+  ['fo-client','fo-project-name','fo-sales-name','fo-dm','fo-next-action','fo-notes'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['fo-close-date','fo-start-date','fo-last-contact','fo-next-fu'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('fo-stage-form').value='Identified';
+  document.getElementById('fo-win-prob').value='';
+  document.getElementById('fo-deal-value').value='';
+  document.getElementById('fo-engagement').value='';
+  document.getElementById('fo-source').value='';
+  document.getElementById('fo-budget').value='Unknown';
+  document.getElementById('fo-fu-status').value='On Track';
+  document.getElementById('fo-stall').value='';
+  Array.from(document.getElementById('fo-service-type').options).forEach(o=>o.selected=false);
+  if(CU.role==='sales') document.getElementById('fo-sales-name').value=CU.name;
+  document.getElementById('opp-err').textContent='';
+}
+
+function submitOpp(){
+  const client=(document.getElementById('fo-client').value||'').trim();
+  const projName=(document.getElementById('fo-project-name').value||'').trim();
+  if(!client){document.getElementById('opp-err').textContent='Client wajib diisi.';return;}
+  if(!projName){document.getElementById('opp-err').textContent='Project name wajib diisi.';return;}
+  document.getElementById('opp-err').textContent='';
+
+  const serviceType=Array.from(document.getElementById('fo-service-type').selectedOptions).map(o=>o.value);
+  const obj={
+    client,
+    projectName : projName,
+    salesName   : document.getElementById('fo-sales-name').value.trim(),
+    stage       : document.getElementById('fo-stage-form').value,
+    winProb     : parseFloat(document.getElementById('fo-win-prob').value)||0,
+    dealValue   : parseFloat(document.getElementById('fo-deal-value').value)||0,
+    closeDate   : document.getElementById('fo-close-date').value||null,
+    startDate   : document.getElementById('fo-start-date').value||null,
+    serviceType,
+    engagementModel: document.getElementById('fo-engagement').value,
+    dealSource  : document.getElementById('fo-source').value,
+    budgetConfirmed: document.getElementById('fo-budget').value,
+    lastContact : document.getElementById('fo-last-contact').value||null,
+    nextFU      : document.getElementById('fo-next-fu').value||null,
+    fuStatus    : document.getElementById('fo-fu-status').value,
+    stallReason : document.getElementById('fo-stall').value,
+    decisionMaker: document.getElementById('fo-dm').value.trim(),
+    nextAction  : document.getElementById('fo-next-action').value.trim(),
+    notes       : document.getElementById('fo-notes').value.trim()
+  };
+
+  const editId=document.getElementById('edit-opp-id').value;
+  const action = editId ? DB.updateOpp(editId, obj) : DB.createOpp(obj);
+  action.then(()=>{
+    toast(editId?'Deal diupdate ✓':'Deal baru ditambahkan ✓','success');
+    showPage('pipeline');
+  }).catch(e=>{
+    document.getElementById('opp-err').textContent='Error: '+e.message;
+  });
+}
+
+function editOpp(id){
+  const o=DB.get('opportunities').find(x=>x.id===id); if(!o) return;
+  showPage('add-opp');
+  document.getElementById('edit-opp-id').value=id;
+  document.getElementById('form-opp-title').textContent='Edit Deal';
+  document.getElementById('fo-client').value=o.client||'';
+  document.getElementById('fo-project-name').value=o.projectName||'';
+  document.getElementById('fo-sales-name').value=o.salesName||'';
+  document.getElementById('fo-stage-form').value=o.stage||'Identified';
+  document.getElementById('fo-win-prob').value=o.winProb||'';
+  document.getElementById('fo-deal-value').value=o.dealValue||'';
+  document.getElementById('fo-close-date').value=o.closeDate||'';
+  document.getElementById('fo-start-date').value=o.startDate||'';
+  document.getElementById('fo-engagement').value=o.engagementModel||'';
+  document.getElementById('fo-source').value=o.dealSource||'';
+  document.getElementById('fo-budget').value=o.budgetConfirmed||'Unknown';
+  document.getElementById('fo-last-contact').value=o.lastContact||'';
+  document.getElementById('fo-next-fu').value=o.nextFU||'';
+  document.getElementById('fo-fu-status').value=o.fuStatus||'On Track';
+  document.getElementById('fo-stall').value=o.stallReason||'';
+  document.getElementById('fo-dm').value=o.decisionMaker||'';
+  document.getElementById('fo-next-action').value=o.nextAction||'';
+  document.getElementById('fo-notes').value=o.notes||'';
+  const selTypes=document.getElementById('fo-service-type');
+  Array.from(selTypes.options).forEach(opt=>{ opt.selected=(o.serviceType||[]).includes(opt.value); });
+}
+
+function delOpp(id){
+  if(!confirm('Hapus deal ini dari pipeline?')) return;
+  DB.deleteOpp(id).then(()=>{ toast('Deal dihapus.','success'); renderPipeline(); });
+}
 </script>
 </body>
 </html>
