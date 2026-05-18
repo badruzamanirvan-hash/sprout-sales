@@ -3052,9 +3052,8 @@ function renderPipeline(){
     <thead><tr>
       <th>Client / Deal</th>
       <th>Stage</th>
-      <th>Deal Value</th>
+      <th style="white-space:nowrap;min-width:160px">Deal Value</th>
       <th>Win %</th>
-      <th>Weighted</th>
       <th>Sales</th>
       <th>Last Contact</th>
       <th>Next FU</th>
@@ -3067,16 +3066,14 @@ function renderPipeline(){
       const sc = STAGE_COLORS[o.stage]||'';
       const fc = FU_COLORS[o.fuStatus]||'';
       const isOverdue = o.nextFU&&o.nextFU<t&&o.stage!=='Closed Won'&&o.stage!=='Closed Lost';
-      const weighted_val = (o.dealValue||0)*(o.winProb||0)/100;
       return `<tr style="${isOverdue?'background:rgba(248,113,113,.04)':''}">
         <td>
           <div style="font-weight:600;color:var(--text)">${o.client||'—'}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">${o.projectName||''}</div>
         </td>
         <td><span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;${sc}">${o.stage}</span></td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);white-space:nowrap">${o.dealValue?'Rp '+fmtIDR(o.dealValue):'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);white-space:nowrap;min-width:160px">${o.dealValue?'Rp '+fmtIDR(o.dealValue):'—'}</td>
         <td style="font-weight:600;color:${(o.winProb||0)>=60?'var(--green)':(o.winProb||0)>=30?'var(--yellow)':'var(--text2)'};white-space:nowrap">${o.winProb||0}%</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap">${weighted_val?'Rp '+fmtIDR(weighted_val):'—'}</td>
         <td style="font-size:12px;color:var(--text2)">${o.salesName||'—'}</td>
         <td style="font-size:12px;color:var(--text3)">${o.lastContact?fmtDate(o.lastContact):'—'}</td>
         <td style="font-size:12px;color:${isOverdue?'var(--red)':'var(--text)'};font-weight:${isOverdue?'600':'400'}">${o.nextFU?fmtDate(o.nextFU):'—'}${isOverdue?' 🔴':''}</td>
