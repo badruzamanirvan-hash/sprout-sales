@@ -249,37 +249,39 @@ async function atDelete(table, id){
 // ============================================================
 function actToFields(a){
   const f = {
-    'Tanggal'      : a.tanggal||null,
-    'Client'       : a.client||'',
-    'Sales Name'   : a.salesName||'',
-    'Activity Type': a.actType||'',
-    'MoM'          : a.mom||'',
-    'Potential'    : a.potential||'',
-    'Next Step'    : a.nextStep||'',
-    'Tanggal FU'   : a.tanggalFU||null,
-    'Status FU'    : a.statusFU||'Pending',
-    'Project ID'   : a.projectId||''
+    'Tanggal'            : a.tanggal||null,
+    'Client'             : a.client||'',
+    'Sales Name'         : a.salesName||'',
+    'Activity Type'      : a.actType||'',
+    'MoM'                : a.mom||'',
+    'Potential'          : a.potential||'',
+    'Next Step'          : a.nextStep||'',
+    'Tanggal FU'         : a.tanggalFU||null,
+    'Status FU'          : a.statusFU||'Pending',
+    'Project ID'         : a.projectId||'',
+    'Linked Opportunity' : a.opportunityId ? [a.opportunityId] : undefined
   };
-  // Remove empty optional fields
-  Object.keys(f).forEach(k=>{ if(f[k]===null||f[k]==='') delete f[k]; });
+  Object.keys(f).forEach(k=>{ if(f[k]===null||f[k]===''||f[k]===undefined) delete f[k]; });
   return f;
 }
 function actFromRecord(r){
   const f=r.fields;
+  const linkedOpp=f['Linked Opportunity'];
   return {
-    _id       : r.id,
-    id        : r.id,
-    tanggal   : f['Tanggal']||'',
-    client    : f['Client']||'',
-    salesName : f['Sales Name']||'',
-    actType   : f['Activity Type']||'',
-    mom       : f['MoM']||'',
-    potential : f['Potential']||'',
-    nextStep  : f['Next Step']||'',
-    tanggalFU : f['Tanggal FU']||null,
-    statusFU  : f['Status FU']||'Pending',
-    projectId : f['Project ID']||null,
-    createdAt : r.createdTime
+    _id          : r.id,
+    id           : r.id,
+    tanggal      : f['Tanggal']||'',
+    client       : f['Client']||'',
+    salesName    : f['Sales Name']||'',
+    actType      : f['Activity Type']||'',
+    mom          : f['MoM']||'',
+    potential    : f['Potential']||'',
+    nextStep     : f['Next Step']||'',
+    tanggalFU    : f['Tanggal FU']||null,
+    statusFU     : f['Status FU']||'Pending',
+    projectId    : f['Project ID']||null,
+    opportunityId: Array.isArray(linkedOpp)&&linkedOpp.length ? (linkedOpp[0].id||linkedOpp[0]) : null,
+    createdAt    : r.createdTime
   };
 }
 
@@ -666,6 +668,13 @@ function showToastGlobal(msg,type){ showToast(msg,type); }
           <div class="form-group full"><label>Next Step</label><textarea id="fa-nextstep" placeholder="Apa langkah selanjutnya?"></textarea></div>
           <div class="form-group"><label>Tanggal Follow-up</label><input type="date" id="fa-fudate"></div>
           <div class="form-group"><label>Status FU</label><select id="fa-fustatus"><option value="Pending">Pending</option><option value="Done">Done</option><option value="Win">🏆 Win</option></select></div>
+          <div class="form-group full">
+            <label>🎯 Link ke Pipeline Deal</label>
+            <select id="fa-opportunity">
+              <option value="">— Tidak ada / aktivitas umum —</option>
+            </select>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">Jika activity ini terkait deal di pipeline, pilih di sini. Last Contact Date di deal akan otomatis diupdate.</div>
+          </div>
         </div>
         <div id="act-err" class="error-msg"></div>
         <div class="form-actions">
@@ -1413,11 +1422,13 @@ function buildActRows(recs,actions){
     const tc=(r.actType||'').toLowerCase();
     const pc=(r.potential||'').toLowerCase();
     const linkedProj=r.projectId?DB.get('projects').find(p=>p.id===r.projectId):null;
+    const linkedOpp=r.opportunityId?DB.get('opportunities').find(o=>o.id===r.opportunityId):null;
     h+=`<tr class="${ov?'overdue':isWin?'win-row':''}" onclick="openDetail('${r.id}')" style="cursor:pointer">
       <td><div class="td-main">${fmtDate(r.tanggal)}</div><div class="td-sub">${r.salesName||''}</div></td>
       <td>
         <div class="td-main">${r.client||'-'}</div>
         ${linkedProj?`<div class="td-sub" style="color:#E9D5FF">🔗 ${linkedProj.client}</div>`:''}
+        ${linkedOpp?`<div class="td-sub" style="color:var(--orange)">🎯 ${linkedOpp.client}${linkedOpp.projectName?' — '+linkedOpp.projectName:''} (${linkedOpp.winProb||0}%)</div>`:''}
       </td>
       <td><span class="badge badge-${tc}">${r.actType||'-'}</span></td>
       <td>
@@ -1444,10 +1455,16 @@ function openDetail(id){
   const tc=(r.actType||'').toLowerCase(),pc=(r.potential||'').toLowerCase(),sc=(r.statusFU||'pending').toLowerCase();
   const isWin=r.potential==='Win';
   const linkedProj=r.projectId?DB.get('projects').find(p=>p.id===r.projectId):null;
+  const linkedOpp=r.opportunityId?DB.get('opportunities').find(o=>o.id===r.opportunityId):null;
 
   document.getElementById('modal-body').innerHTML=`
     ${isWin?`<div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#E9D5FF">
       🏆 <strong>Deal Won!</strong>${linkedProj?' Linked ke project: <strong>'+linkedProj.client+'</strong>':' Belum ada project — klik "Buat Project" di bawah'}
+    </div>`:''}
+    ${linkedOpp?`<div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--text)">
+      🎯 <strong>Pipeline Deal:</strong> ${linkedOpp.client}${linkedOpp.projectName?' — '+linkedOpp.projectName:''} &nbsp;·&nbsp;
+      <span style="color:var(--orange);font-weight:600">${linkedOpp.stage}</span> &nbsp;·&nbsp;
+      Win ${linkedOpp.winProb||0}%${linkedOpp.dealValue?' &nbsp;·&nbsp; Rp '+fmtIDR(linkedOpp.dealValue):''}
     </div>`:''}
     <div class="detail-row"><div class="detail-key">Tanggal</div><div class="detail-val">${fmtDate(r.tanggal)}</div></div>
     <div class="detail-row"><div class="detail-key">Client</div><div class="detail-val">${r.client||'-'}</div></div>
@@ -1484,6 +1501,12 @@ function resetActForm(){
   document.getElementById('fa-fustatus').value='Pending';
   document.getElementById('act-err').textContent='';
   document.querySelectorAll('#page-add-activity .toggle-btn').forEach(b=>b.className='toggle-btn');
+  const oppSel=document.getElementById('fa-opportunity');
+  if(oppSel){
+    const opps=DB.get('opportunities').filter(o=>o.stage!=='Closed Won'&&o.stage!=='Closed Lost');
+    oppSel.innerHTML='<option value="">— Tidak ada / aktivitas umum —</option>'
+      +opps.map(o=>`<option value="${o.id}">[${o.stage}] ${o.client}${o.projectName?' — '+o.projectName:''}</option>`).join('');
+  }
 }
 
 function submitActivity(){
@@ -1497,6 +1520,7 @@ function submitActivity(){
   const fuStatus=document.getElementById('fa-fustatus').value;
   const finalFuStatus=(pot==='Win')?'Win':fuStatus;
   const existingAct=eid?DB.get('activities').find(a=>a.id===eid):null;
+  const selectedOppId=document.getElementById('fa-opportunity')?.value||null;
   const rec={
     id:eid||DB.id(), tanggal, client,
     salesName:CU.name, actType:type,
@@ -1506,6 +1530,7 @@ function submitActivity(){
     tanggalFU:document.getElementById('fa-fudate').value||null,
     statusFU:finalFuStatus,
     projectId:existingAct?.projectId||null,
+    opportunityId:selectedOppId||existingAct?.opportunityId||null,
     createdAt:eid?existingAct?.createdAt:new Date().toISOString()
   };
   const btn=document.querySelector('#page-add-activity .btn-primary');
@@ -1514,6 +1539,11 @@ function submitActivity(){
     ? DB.updateActivity(eid, rec)
     : DB.createActivity(rec);
   doSave.then(saved=>{
+    // Auto-update Last Contact Date on linked opportunity
+    if(saved.opportunityId){
+      const opp=DB.get('opportunities').find(o=>o.id===saved.opportunityId);
+      if(opp) DB.updateOpp(saved.opportunityId,{...opp,lastContact:tanggal||tod()}).catch(()=>{});
+    }
     refreshSalesDropdowns();
     toast(eid?'Aktivitas diperbarui ✓':'Aktivitas tersimpan ✓');
     if(pot==='Win'&&!saved.projectId){
@@ -1552,6 +1582,7 @@ function editAct(id){
     const b=document.querySelector(`#page-add-activity .toggle-btn[data-val="${r.potential}"]`);
     if(b) selToggle('fa-pot', r.potential, b);
   }
+  if(r.opportunityId) document.getElementById('fa-opportunity').value=r.opportunityId;
 }
 
 // ===== WIN → PROJECT (direct form flow) =====
