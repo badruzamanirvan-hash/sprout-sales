@@ -201,15 +201,34 @@ const CACHE = { activities:[], projects:[], members:[], opportunities:[] };
 //  sees it)
 // ============================================================
 const AT_BASE = `${WORKER_URL}/airtable`;
-const AT_HEADERS = () => ({
-  'Content-Type' : 'application/json'
-});
+
+// Session token issued by the Worker at login. Without it the Worker
+// returns 401 and never reaches Airtable.
+let SESSION_TOKEN = sessionStorage.getItem('sprout_token') || '';
+function setSessionToken(t){
+  SESSION_TOKEN = t || '';
+  try { t ? sessionStorage.setItem('sprout_token', t) : sessionStorage.removeItem('sprout_token'); } catch(e){}
+}
+function handleAuthFailure(){
+  setSessionToken('');
+  const login = document.getElementById('login-screen');
+  const app   = document.getElementById('app');
+  if(login && app){ app.style.display='none'; login.style.display='flex'; }
+  try { showToast('Sesi berakhir, silakan login lagi','error'); } catch(e){}
+}
+
+const AT_HEADERS = () => {
+  const h = { 'Content-Type' : 'application/json' };
+  if (SESSION_TOKEN) h['Authorization'] = `Bearer ${SESSION_TOKEN}`;
+  return h;
+};
 
 async function atFetchAll(table){
   let records=[], offset=null;
   do {
     const url = `${AT_BASE}/${encodeURIComponent(table)}?pageSize=100${offset?'&offset='+offset:''}`;
     const res  = await fetch(url,{headers:AT_HEADERS()});
+    if(res.status===401){ handleAuthFailure(); throw new Error('Not authenticated'); }
     if(!res.ok) throw new Error(`Airtable GET error: ${await res.text()}`);
     const data = await res.json();
     records    = records.concat(data.records||[]);
@@ -223,7 +242,8 @@ async function atCreate(table, fields){
     method:'POST', headers:AT_HEADERS(),
     body: JSON.stringify({fields})
   });
-  if(!res.ok) throw new Error(`Airtable CREATE error: ${await res.text()}`);
+  if(res.status===401){ handleAuthFailure(); throw new Error('Not authenticated'); }
+    if(!res.ok) throw new Error(`Airtable CREATE error: ${await res.text()}`);
   return (await res.json());
 }
 
@@ -232,7 +252,8 @@ async function atUpdate(table, id, fields){
     method:'PATCH', headers:AT_HEADERS(),
     body: JSON.stringify({fields})
   });
-  if(!res.ok) throw new Error(`Airtable UPDATE error: ${await res.text()}`);
+  if(res.status===401){ handleAuthFailure(); throw new Error('Not authenticated'); }
+    if(!res.ok) throw new Error(`Airtable UPDATE error: ${await res.text()}`);
   return (await res.json());
 }
 
@@ -240,7 +261,8 @@ async function atDelete(table, id){
   const res = await fetch(`${AT_BASE}/${encodeURIComponent(table)}/${id}`,{
     method:'DELETE', headers:AT_HEADERS()
   });
-  if(!res.ok) throw new Error(`Airtable DELETE error: ${await res.text()}`);
+  if(res.status===401){ handleAuthFailure(); throw new Error('Not authenticated'); }
+    if(!res.ok) throw new Error(`Airtable DELETE error: ${await res.text()}`);
   return true;
 }
 
@@ -516,6 +538,7 @@ async function verifyPasswordViaWorker(role, password){
     });
     if(!res.ok) return false;
     const data = await res.json();
+    if(data.ok && data.token) setSessionToken(data.token);
     return !!data.ok;
   }catch(e){
     return false;
